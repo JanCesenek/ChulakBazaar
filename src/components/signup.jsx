@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Form } from "react-router-dom";
+import { Form, useNavigate } from "react-router-dom";
 import Button from "./custom/button";
 import { api } from "../core/api";
 import { createClient } from "@supabase/supabase-js";
@@ -70,6 +70,7 @@ const SignUp = (props) => {
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const fileInputRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const supabase = createClient(supStorageURL, supStorageKEY);
 
@@ -136,7 +137,9 @@ const SignUp = (props) => {
         console.log("Files listed!", dataGet);
       }
     };
-    profilePic && handleUpload();
+    if (profilePic) {
+      await handleUpload();
+    }
 
     const postReqPayload = {
       firstName,
@@ -160,6 +163,7 @@ const SignUp = (props) => {
         localStorage.setItem("token", token);
         localStorage.setItem("curUser", username);
         resetForm();
+        navigate("/");
         props.setLog();
       })
       .catch((err) => console.log(`Post req err - ${err}`));

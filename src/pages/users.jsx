@@ -5,7 +5,7 @@ import Profile from "../components/profile";
 import Loading from "../components/custom/loading";
 import Button from "../components/custom/button";
 import { v4 as uuid } from "uuid";
-import { BsFillFileImageFill } from "react-icons/bs";
+import { BsFillFileImageFill, BsTrashFill } from "react-icons/bs";
 import { FcVip } from "react-icons/fc";
 import { api } from "../core/api";
 import { createClient } from "@supabase/supabase-js";
@@ -13,7 +13,7 @@ import { supStorageURL, supStorageKEY } from "../core/supabaseStorage";
 import Items from "../pages/items";
 
 const Users = (props) => {
-  const { data, isLoading } = useUpdate("/users");
+  const { data, refetch: refetchUsers, isLoading } = useUpdate("/users");
   const { data: itemData, refetch, isLoading: itemsLoading } = useUpdate("/items");
   const { data: transactionData, isLoading: transactionsLoading } = useUpdate("/transactions");
   const { data: reviewData, isLoading: reviewsLoading } = useUpdate("/reviews");
@@ -93,6 +93,20 @@ const Users = (props) => {
 
   const getMonth = (m) => {
     return m.toLocaleString("default", { month: "short" });
+  };
+
+  const deleteUser = async (id) => {
+    if (window.confirm(`Really wanna delete ${id}?`)) {
+      await api
+        .delete(`/users/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then(async () => await refetchUsers())
+        .catch((err) => console.log(`Delete req - ${err}`));
+    }
   };
 
   const validForm = name && image && description;
@@ -237,7 +251,7 @@ const Users = (props) => {
         />
       )}
       {ownTransactions && transactionData?.length > 0 && (
-        <div className="mt-5 flex text-[1.2rem] w-[70rem] [&>*]:w-full">
+        <div className="mt-5 flex text-[1.2rem] w-[70rem] [@media(max-width:600px)]:w-[50rem] [&>*]:w-full">
           <div className="flex flex-col items-start [&>*]:w-full">
             <div className="flex justify-around bg-black">Name</div>
             {transactionData?.map((el) => {
@@ -303,7 +317,7 @@ const Users = (props) => {
               }
             })}
           </div>
-          <div className="flex flex-col items-start [&>*]:w-full">
+          <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full">
             <div className="flex justify-around bg-black">Buyer</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -319,7 +333,7 @@ const Users = (props) => {
               }
             })}
           </div>
-          <div className="flex flex-col items-start [&>*]:w-full">
+          <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full">
             <div className="flex justify-around bg-black">Seller</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -403,8 +417,7 @@ const Users = (props) => {
         const userPattern = (
           <div
             key={el.id}
-            className={`flex justify-between p-5 items-center bg-black ${getColor()} bg-opacity-50 hover:cursor-pointer my-2 min-w-[30rem]`}
-            onClick={() => setProfile(el)}>
+            className={`flex justify-between p-5 items-center bg-black ${getColor()} bg-opacity-50 my-2 min-w-[30rem]`}>
             <span className="flex items-center">
               {el.admin && <FcVip className="w-10 h-10" />}
               <img
@@ -413,9 +426,15 @@ const Users = (props) => {
                 className="w-auto h-auto max-w-[5rem] max-h-[5rem] mr-5"
               />
             </span>
-            <p>
+            <p className="hover:cursor-pointer" onClick={() => setProfile(el)}>
               {el.firstName} {el.lastName}
             </p>
+            {curUser?.admin && (
+              <BsTrashFill
+                className="text-red-600 hover:cursor-pointer"
+                onClick={() => deleteUser(el.username)}
+              />
+            )}
           </div>
         );
         if (findUsers && userValue) {

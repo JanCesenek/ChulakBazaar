@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Form, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Form } from "react-router-dom";
 import Button from "./custom/button";
 import Submitting from "./custom/submitting";
 import { api } from "../core/api";
@@ -7,13 +7,7 @@ import { api } from "../core/api";
 const Login = (props) => {
   const [usernameValue, setUsernameValue] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
-  const loggedIn = localStorage.getItem("token");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    loggedIn && navigate("user");
-  }, []);
 
   const addBearerToken = (token) => {
     if (!token) {
@@ -37,7 +31,6 @@ const Login = (props) => {
         localStorage.setItem("curUser", username);
         localStorage.setItem("token", token);
         props.setLog();
-        navigate("/");
       })
       .catch((err) => console.log(`Invalid credentials - ${err}`));
     setIsSubmitting(false);

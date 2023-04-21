@@ -17,6 +17,7 @@ const ItemDetail = (props) => {
   const [editItem, setEditItem] = useState(false);
   const [editedName, setEditedName] = useState(props.name);
   const [editedPrice, setEditedPrice] = useState(props.price);
+  const [transactionInProgress, setTransactionInProgress] = useState(false);
   const [editedQuantity, setEditedQuantity] = useState(props.quantity);
   const [editedDescription, setEditedDescription] = useState(props.description);
   const [quantity, setQuantity] = useState(1);
@@ -48,6 +49,7 @@ const ItemDetail = (props) => {
       type: props.type,
       sell: e === "sell" ? true : false,
     };
+    setTransactionInProgress(true);
     await api
       .post("/transactions", postReqPayload, {
         headers: {
@@ -57,6 +59,7 @@ const ItemDetail = (props) => {
       })
       .then(() => refetchData())
       .catch((err) => console.log(`Post req - ${err}`));
+    setTransactionInProgress(false);
   };
 
   const updateItem = async (id, restock) => {
@@ -185,7 +188,11 @@ const ItemDetail = (props) => {
         props.quantity > 0 &&
         (props.type === "sell" ? (
           <div className="flex w-1/4 justify-around">
-            <Button title="Buy" onClick={itemHandler} />
+            <Button
+              title={transactionInProgress ? "Buying..." : "Buy"}
+              onClick={itemHandler}
+              classes={transactionInProgress && "pointer-events-none opacity-50"}
+            />
             <input
               type="number"
               name="amount"
@@ -200,7 +207,11 @@ const ItemDetail = (props) => {
           </div>
         ) : (
           <div className="flex justify-center">
-            <Button title="Bid" onClick={itemHandler} />
+            <Button
+              title={transactionInProgress ? "Bidding..." : "Bid"}
+              onClick={itemHandler}
+              classes={transactionInProgress && "pointer-events-none opacity-50"}
+            />
             <input
               type="number"
               value={price}
@@ -212,7 +223,11 @@ const ItemDetail = (props) => {
           </div>
         ))}
       {props.own && props.type === "bid" && curBid && props.quantity === 1 && (
-        <Button title="Sell" onClick={() => itemHandler("sell")} />
+        <Button
+          title={transactionInProgress ? "Selling..." : "Sell"}
+          onClick={() => itemHandler("sell")}
+          classes={transactionInProgress && "pointer-events-none opacity-50"}
+        />
       )}
       {props.own &&
         props.profile === curUsername &&
