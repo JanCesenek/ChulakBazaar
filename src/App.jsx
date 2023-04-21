@@ -8,6 +8,7 @@ import Users from "./pages/users";
 import Messages from "./pages/messages";
 import Auth from "./pages/auth";
 import { api } from "./core/api";
+import { BsHourglassSplit } from "react-icons/bs";
 
 function App() {
   const loggedIn = localStorage.getItem("token");
@@ -45,7 +46,11 @@ function App() {
         { path: "/items", element: <Items /> },
         { path: "/users", element: <Users setLog={() => setLog(!log)} /> },
         { path: "/messages", element: <Messages /> },
-        { path: "/auth", element: <Auth setLog={() => setLog(!log)} /> },
+        {
+          path: "/auth",
+          element: <Auth setLog={() => setLog(!log)} />,
+          errorElement: <BsHourglassSplit className="mt-10 w-[4rem] h-[4rem] animate-spin" />,
+        },
       ],
     },
   ]);
