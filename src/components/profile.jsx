@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../core/api";
 import { useUpdate } from "../hooks/use-update";
 import { BsStarFill, BsStarHalf, BsStar, BsTrashFill } from "react-icons/bs";
-import { GiCrossedSwords, GiTwoCoins } from "react-icons/gi";
+import { GiCrossedSwords, GiTwoCoins, GiNinjaHead, GiClusterBomb } from "react-icons/gi";
 import { createClient } from "@supabase/supabase-js";
 import { supStorageURL, supStorageKEY } from "../core/supabaseStorage";
 import Loading from "./custom/loading";
@@ -16,6 +16,7 @@ const Profile = (props) => {
   const [userReviews, setUserReviews] = useState(false);
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(3);
+  const [isBeingDeleted, setIsBeingDeleted] = useState(false);
   const { data, refetch, isLoading } = useUpdate("/users");
   const { data: transactionsData, isLoading: transactionsLoading } = useUpdate("/transactions");
   const {
@@ -244,6 +245,7 @@ const Profile = (props) => {
   // Delete req for deleting a user
   const deleteUser = async (e) => {
     if (window.confirm("Really wanna delete your account?")) {
+      setIsBeingDeleted(true);
       if (props.profilePicture !== malePic && props.profilePicture !== femalePic) {
         const { data } = await supabase.storage.from("imgs").list("userPics");
         const curFile = data.find((el) => props.profilePicture.includes(el.name));
@@ -272,10 +274,19 @@ const Profile = (props) => {
           navigate("/auth");
         })
         .catch((err) => console.log(`Delete req err - ${err}`));
+      setIsBeingDeleted(false);
     } else e.preventDefault();
   };
 
   if (loading) return <Loading />;
+
+  if (isBeingDeleted)
+    return (
+      <div className="flex items-center mt-10 text-[3rem] text-red-600 p-5 border border-red-600">
+        <p>Account is being deleted!</p> <GiNinjaHead className="animate-pulse" />{" "}
+        <GiClusterBomb className="animate-pulse" />
+      </div>
+    );
 
   return (
     <div
