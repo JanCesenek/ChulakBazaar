@@ -2,7 +2,7 @@ import React from "react";
 
 const Intro = () => {
   return (
-    <div className="mt-10 flex flex-col items-center bg-black bg-opacity-50 w-[70rem] p-5 [&>*]:my-5">
+    <div className="mt-10 flex flex-col items-center bg-black/50 rounded-lg shadow-yellow-400/50 shadow-md w-[50rem] sm:w-[70rem] p-5 [&>*]:my-5">
       <img
         src="https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/sholvaArt.jpg"
         alt="sholva"

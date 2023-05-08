@@ -9,6 +9,7 @@ import Messages from "./pages/messages";
 import Auth from "./pages/auth";
 import { api } from "./core/api";
 import { BsHourglassSplit } from "react-icons/bs";
+import { useRouteError } from "react-router-dom";
 
 function App() {
   const loggedIn = localStorage.getItem("token");
@@ -36,6 +37,12 @@ function App() {
       .catch((err) => console.log(`Get req err - ${err}`));
   }, []);
 
+  const CustomElement = () => {
+    const error = useRouteError();
+    console.error(error);
+    return <BsHourglassSplit className="mt-10 w-[4rem] h-[4rem] animate-spin" />;
+  };
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -49,7 +56,7 @@ function App() {
         {
           path: "/auth",
           element: <Auth setLog={() => setLog(!log)} />,
-          errorElement: <BsHourglassSplit className="mt-10 w-[4rem] h-[4rem] animate-spin" />,
+          method: ["GET", "POST"],
         },
       ],
     },

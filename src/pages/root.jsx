@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import MainNavigation from "../components/mainNavigation";
 import { Outlet } from "react-router-dom";
 import { GiRingedPlanet, GiCoinsPile } from "react-icons/gi";

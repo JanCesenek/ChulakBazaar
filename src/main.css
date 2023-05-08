@@ -51,3 +51,9 @@ html {
     font-size: 37.5%;
   }
 }
+
+@media (min-width: 2200px) {
+  html {
+    font-size: 75%;
+  }
+}

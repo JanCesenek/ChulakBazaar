@@ -251,8 +251,8 @@ const Users = (props) => {
         />
       )}
       {ownTransactions && transactionData?.length > 0 && (
-        <div className="mt-5 flex text-[1.2rem] w-[70rem] [@media(max-width:600px)]:w-[50rem] [&>*]:w-full">
-          <div className="flex flex-col items-start [&>*]:w-full">
+        <div className="mt-5 flex text-[1.2rem] min-w-[70rem] [@media(max-width:600px)]:w-[50rem] [&>*]:w-auto">
+          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
             <div className="flex justify-around bg-black">Name</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -261,7 +261,7 @@ const Users = (props) => {
                   <div
                     key={el.id}
                     className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-yellow-400"
+                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
                     }`}>
                     <p>{findItem?.name}</p>
                   </div>
@@ -269,7 +269,7 @@ const Users = (props) => {
               }
             })}
           </div>
-          <div className="flex flex-col items-start [&>*]:w-full">
+          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
             <div className="flex justify-around bg-black">Quantity</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -277,7 +277,7 @@ const Users = (props) => {
                   <div
                     key={el.id}
                     className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-yellow-400"
+                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
                     }`}>
                     <p>{el.quantity}</p>
                   </div>
@@ -285,7 +285,7 @@ const Users = (props) => {
               }
             })}
           </div>
-          <div className="flex flex-col items-start [&>*]:w-full">
+          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
             <div className="flex justify-around bg-black">Total price</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -293,7 +293,7 @@ const Users = (props) => {
                   <div
                     key={el.id}
                     className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-yellow-400"
+                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
                     }`}>
                     <p>{el.total}</p>
                   </div>
@@ -301,7 +301,7 @@ const Users = (props) => {
               }
             })}
           </div>
-          <div className="flex flex-col items-start [&>*]:w-full">
+          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
             <div className="flex justify-around bg-black">Type</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -309,7 +309,7 @@ const Users = (props) => {
                   <div
                     key={el.id}
                     className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-yellow-400"
+                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
                     }`}>
                     <p>{el.type}</p>
                   </div>
@@ -317,7 +317,7 @@ const Users = (props) => {
               }
             })}
           </div>
-          <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full">
+          <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full [&>*]:px-5">
             <div className="flex justify-around bg-black">Buyer</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -325,7 +325,7 @@ const Users = (props) => {
                   <div
                     key={el.id}
                     className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-yellow-400"
+                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
                     }`}>
                     <p>{el.buyer}</p>
                   </div>
@@ -333,7 +333,7 @@ const Users = (props) => {
               }
             })}
           </div>
-          <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full">
+          <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full [&>*]:px-5">
             <div className="flex justify-around bg-black">Seller</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -341,7 +341,7 @@ const Users = (props) => {
                   <div
                     key={el.id}
                     className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-yellow-400"
+                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
                     }`}>
                     <p>{el.seller}</p>
                   </div>
@@ -349,7 +349,7 @@ const Users = (props) => {
               }
             })}
           </div>
-          <div className="flex flex-col items-start [&>*]:w-full">
+          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
             <div className="flex justify-around bg-black">Date</div>
             {transactionData?.map((el) => {
               if (el.buyer === profile?.username || el.seller === profile?.username) {
@@ -358,7 +358,7 @@ const Users = (props) => {
                   <div
                     key={el.id}
                     className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-yellow-400"
+                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
                     }`}>
                     <p>
                       {el.createdAt.slice(8, 10)} {getMonth(createdAt)} {el.createdAt.slice(0, 4)}

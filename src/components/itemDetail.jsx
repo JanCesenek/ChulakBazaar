@@ -83,7 +83,7 @@ const ItemDetail = (props) => {
   };
 
   return editItem ? (
-    <div className="my-10 flex flex-col w-[60rem] bg-black bg-opacity-50 [&>*]:my-2 text-[1.7rem] p-5">
+    <div className="my-10 flex flex-col w-[50rem] sm:w-[60rem] bg-black/50 rounded-lg shadow-yellow-400/50 shadow-md [&>*]:my-2 text-[1.7rem] p-5">
       <div className="flex items-center">
         <label htmlFor="name" className="w-[15rem]">
           Name:
@@ -144,7 +144,7 @@ const ItemDetail = (props) => {
       </p>
     </div>
   ) : (
-    <div className="mt-10 flex flex-col items-center w-[60rem] bg-black bg-opacity-50 [&>*]:my-5 text-[1.7rem]">
+    <div className="mt-10 flex flex-col items-center w-[50rem] sm:w-[60rem] bg-black/50 rounded-lg shadow-yellow-400/50 shadow-md [&>*]:my-5 text-[1.7rem]">
       <img
         src={props.image}
         alt="some img"
