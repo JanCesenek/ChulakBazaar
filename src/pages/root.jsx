@@ -17,7 +17,7 @@ const RootLayout = (props) => {
     <div className="min-h-screen 2xl:mx-[20rem] bg-black bg-opacity-70 flex flex-col items-center">
       <MainNavigation log={props.log} setLog={props.setLog} />
       <h1
-        className={`text-[5rem] flex items-center mt-10 font-["Audiowide",cursive] border border-white bg-black bg-opacity-50 rounded-lg p-5`}>
+        className={`text-[5rem] flex items-center mt-20 font-["Audiowide",cursive] shadow-yellow-400 shadow-sm bg-black bg-opacity-50 rounded-lg p-5`}>
         <div>Chulak Bazaar</div>
         <GiRingedPlanet />
       </h1>

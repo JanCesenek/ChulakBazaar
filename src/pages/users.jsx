@@ -23,10 +23,13 @@ const Users = (props) => {
   const curUser = data?.find((el) => el.username === curUsername);
   const [findUsers, setFindUsers] = useState(false);
   const [userValue, setUserValue] = useState("");
+  // Dynamically shows either user's own profile, list of all other users or any other user's profile
   const [profile, setProfile] = useState(curUser);
+  // Show/hide details
   const [addItem, setAddItem] = useState(false);
   const [ownItems, setOwnItems] = useState(false);
   const [ownTransactions, setOwnTransactions] = useState(false);
+  // Tracks values for creating an item
   const [name, setName] = useState("");
   const [price, setPrice] = useState(100);
   const [image, setImage] = useState(null);
@@ -137,11 +140,9 @@ const Users = (props) => {
         setLog={props.setLog}
       />
       {curUsername === profile.username && (
-        <Button
-          title={addItem ? "Hide" : "Add Item"}
-          onClick={() => setAddItem(!addItem)}
-          classes="mt-10"
-        />
+        <p onClick={() => setAddItem(!addItem)} className="mt-10 underline hover:cursor-pointer">
+          {addItem ? "Hide" : "Add Item"}
+        </p>
       )}
       {addItem && (
         <Form className="mt-10 border border-white rounded-lg bg-black bg-opacity-50 w-[40rem] min-h-[20rem] flex flex-col text-[1.8rem] p-5 [&>*]:my-2">
@@ -236,19 +237,17 @@ const Users = (props) => {
         </Form>
       )}
       {anyItems && (
-        <Button
-          title={ownItems ? "Hide own items" : "List own items"}
-          classes="mt-10"
-          onClick={() => setOwnItems(!ownItems)}
-        />
+        <p className="mt-10 underline hover:cursor-pointer" onClick={() => setOwnItems(!ownItems)}>
+          {ownItems ? "Hide own items" : "List own items"}
+        </p>
       )}
       {ownItems && <Items own curUser={profile?.username} />}
       {curUsername === profile.username && anyTransactions && (
-        <Button
-          title={ownTransactions ? "Hide own transactions" : "List own transactions"}
-          classes="mt-10"
-          onClick={() => setOwnTransactions(!ownTransactions)}
-        />
+        <p
+          className="mt-10 underline hover:cursor-pointer"
+          onClick={() => setOwnTransactions(!ownTransactions)}>
+          {ownTransactions ? "Hide own transactions" : "List own transactions"}
+        </p>
       )}
       {ownTransactions && transactionData?.length > 0 && (
         <div className="mt-5 flex text-[1.2rem] min-w-[70rem] [@media(max-width:600px)]:w-[50rem] [&>*]:w-auto">

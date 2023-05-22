@@ -290,8 +290,8 @@ const Profile = (props) => {
 
   return (
     <div
-      className={`grid justify-items-center relative w-[50rem] grid-cols-[1fr] grid-rows-[18rem,min-content] mt-10 border border-gray-600 rounded-2xl [&>*]:w-full [&>:nth-child(1)]:rounded-t-2xl [&>:nth-child(2)]:rounded-b-2xl ${
-        props.admin && "!text-yellow-400 !border-yellow-400"
+      className={`grid justify-items-center relative w-[50rem] grid-cols-[1fr] grid-rows-[18rem,min-content] mt-10 shadow-yellow-400 shadow-md rounded-2xl [&>*]:w-full [&>:nth-child(1)]:rounded-t-2xl [&>:nth-child(2)]:rounded-b-2xl ${
+        props.admin && "!text-yellow-400"
       }`}>
       <div
         className={`grid grid-cols-2 grid-rows-1 bg-gradient-to-b from-black/70 to-gray-500/70 justify-center items-center`}
@@ -349,10 +349,11 @@ const Profile = (props) => {
           </div>
         )}
         {!props.own && curUser && !alreadyReviewed && (
-          <Button
-            title={addReview ? "Hide" : "Add review"}
-            onClick={() => setAddReview(!addReview)}
-          />
+          <p
+            className="text-yellow-600 underline hover:cursor-pointer !mt-10"
+            onClick={() => setAddReview(!addReview)}>
+            {addReview ? "Hide" : "Add review"}
+          </p>
         )}
         {addReview && (
           <div className="bg-black bg-opacity-50 border border-white rounded-md [&>*]:my-2 p-5 flex flex-col">
@@ -390,10 +391,11 @@ const Profile = (props) => {
           </div>
         )}
         {reviews && (
-          <Button
-            title={userReviews ? "Hide user reviews" : "Show user reviews"}
-            onClick={() => setUserReviews(!userReviews)}
-          />
+          <p
+            className="text-yellow-600 underline hover:cursor-pointer !mt-10"
+            onClick={() => setUserReviews(!userReviews)}>
+            {userReviews ? "Hide user reviews" : "Show user reviews"}
+          </p>
         )}
         {userReviews &&
           reviewsData?.map((el) => {

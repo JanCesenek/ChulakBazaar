@@ -49,13 +49,13 @@ const Item = (props) => {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="grid relative grid-rows-[1fr,3fr,1fr] grid-cols-[repeat(4,1fr)] border border-white rounded-md justify-items-center items-center text-[1rem] h-[23rem] hover:translate-x-2 hover:translate-y-[-0.5rem] hover:shadow-yellow-400 hover:shadow-2xl">
+    <div className="grid relative grid-rows-[1fr,3fr,1fr] grid-cols-[repeat(4,1fr)] rounded-lg justify-items-center items-center text-[1rem] h-[23rem] hover:translate-x-2 hover:translate-y-[-0.5rem] shadow-yellow-400/50 shadow-md hover:shadow-yellow-400 hover:shadow-2xl">
       <img
         src={props.image}
         alt="Some img"
-        className="col-span-full row-start-2 row-end-4 w-full h-full"
+        className="col-span-full row-start-2 row-end-4 w-full h-full rounded-b-lg"
       />
-      <div className="row-start-1 row-end-2 col-span-full bg-gradient-to-b from-yellow-300 to-yellow-600 flex flex-col items-center [&>*]:my-1 justify-around w-full h-full text-black">
+      <div className="row-start-1 row-end-2 col-span-full bg-gradient-to-b rounded-t-lg from-yellow-300 to-yellow-600 flex flex-col items-center [&>*]:my-1 justify-around w-full h-full text-black">
         <div className="row-start-1 row-end-2 col-span-full flex items-center font-bold text-[1.1rem]">
           <h4 className="mr-2">{props.name}</h4>
           <GiAbstract010 />

@@ -9,8 +9,11 @@ const Items = (props) => {
   const { data, isLoading } = useUpdate("/items");
   const { data: userData, isLoading: usersLoading } = useUpdate("/users");
   const loading = isLoading || usersLoading;
+  // if true, show item detail, else show all items
   const [itemDetail, setItemDetail] = useState(false);
+  // Show/hide filter
   const [addSort, setAddSort] = useState(false);
+  // Filter values
   const [sort, setSort] = useState(false);
   const [comparison, setComparison] = useState("=");
   const [sortingValue, setSortingValue] = useState("");
@@ -36,13 +39,14 @@ const Items = (props) => {
     <>
       {!props.own && (
         <>
-          <Button
-            title={addSort ? "Hide" : "Search items"}
-            onClick={() => setAddSort(!addSort)}
-            classes="mt-5"
-          />
+          <p
+            className="underline text-yellow-400 my-20 hover:cursor-pointer"
+            onClick={() => setAddSort(!addSort)}>
+            {addSort ? "Hide filter" : "Add filter"}
+          </p>
+          {/* FILTER */}
           {addSort && (
-            <div className="flex justify-around my-10">
+            <div className="flex justify-around mb-20 bg-black/50 rounded-lg shadow-yellow-400 shadow-md p-10">
               <label htmlFor="sort">Sort by:</label>
               <select
                 name="sort"
