@@ -404,7 +404,7 @@ const Profile = (props) => {
               return (
                 <div
                   key={el.id}
-                  className="flex flex-col bg-black bg-opacity-50 border border-white rounded-md p-5 w-4/5">
+                  className="flex flex-col bg-black bg-opacity-50 border border-white rounded-md p-5 w-4/5 !my-5 shadow-lg shadow-white/50">
                   <div className="flex justify-around items-center border-b pb-2 border-gray-600">
                     <img
                       src={reviewer?.profilePicture}

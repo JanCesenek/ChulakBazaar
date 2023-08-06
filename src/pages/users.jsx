@@ -416,7 +416,7 @@ const Users = (props) => {
         const userPattern = (
           <div
             key={el.id}
-            className={`flex justify-between p-5 items-center bg-black ${getColor()} bg-opacity-50 my-2 min-w-[30rem]`}>
+            className={`flex justify-between p-5 items-center bg-gradient-to-b from-gray-600/50 via-black/50 to-gray-600/50 ${getColor()} bg-opacity-50 my-5 shadow-lg shadow-gray-600 rounded-lg min-w-[30rem]`}>
             <span className="flex items-center">
               {el.admin && <FcVip className="w-10 h-10" />}
               <img

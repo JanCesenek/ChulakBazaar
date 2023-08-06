@@ -17,8 +17,20 @@ const Messages = () => {
   const curUsername = localStorage.getItem("curUser");
   const curUser = userData?.find((el) => el.username === curUsername);
   const token = localStorage.getItem("token");
+
   const unreadSystemMessages = messageData?.find(
     (arg) => arg.system && !arg.read && arg.sender === curUsername && arg.recipient === curUsername
+  );
+
+  const systemMsgCheck = messageData?.find(
+    (arg) => arg.sender === curUsername && arg.recipient === curUsername
+  );
+
+  const anyMessages = messageData?.find(
+    (arg) =>
+      (arg.sender === curUsername && arg.recipient === recipient?.username) ||
+      (arg.recipient === curUsername && arg.sender === recipient?.username) ||
+      (recipient === "system" && arg.sender === curUsername && arg.recipient === curUsername)
   );
 
   const senderFrozen = messageData?.find(
@@ -97,10 +109,12 @@ const Messages = () => {
   if (loading) return <Loading />;
 
   return curUsername ? (
-    <div className="mt-10 flex justify-between bg-black bg-opacity-50 w-[70rem] min-h-[50rem] max-w-full [&>*]:w-1/2">
-      <div className="flex flex-col items-center p-5 [&>*]:my-2">
+    <div className="mt-10 flex justify-between bg-black/50 w-[100rem] min-h-[50rem] max-w-full [&>*]:w-1/2 rounded-lg">
+      <div className="flex flex-col items-center p-5 [&>*]:my-5">
         <div
-          className="flex relative justify-between items-center p-5 border border-white hover:cursor-pointer w-[25rem] text-[1rem] bg-black bg-opacity-50"
+          className={`flex relative justify-between items-center p-5 hover:cursor-pointer w-[25rem] text-[1rem] border border-white rounded-lg bg-gradient-to-b from-gray-600/50 via-transparent to-gray-600/50 shadow-lg shadow-gray-600 ${
+            !systemMsgCheck && "opacity-50"
+          } ${recipient === "system" && "text-yellow-500 border-yellow-500 shadow-yellow-500"}`}
           onClick={() => readMessages(curUsername, "system")}>
           <img
             src="https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/system.jpg"
@@ -113,6 +127,11 @@ const Messages = () => {
           )}
         </div>
         {userData?.map((el) => {
+          const msgCheck = messageData?.find(
+            (arg) =>
+              (arg.sender === curUsername && arg.recipient === el.username) ||
+              (arg.recipient === curUsername && arg.sender === el.username)
+          );
           const unreadMessages = messageData?.find(
             (arg) =>
               arg.recipient === curUsername &&
@@ -133,9 +152,11 @@ const Messages = () => {
                 key={el.id}
                 className={`flex justify-between relative items-center p-5 border border-white ${
                   (senderFrozen || recipientFrozen) && "border-blue-400"
-                } hover:cursor-pointer ${
+                } hover:cursor-pointer ${!msgCheck && "opacity-50"} ${
                   recipientFrozen && "hover:cursor-not-allowed"
-                } w-[25rem] text-[1rem] bg-black bg-opacity-50`}
+                } ${
+                  recipient === el && "text-yellow-500 border-yellow-500 shadow-yellow-500"
+                } w-[25rem] text-[1rem] rounded-lg bg-gradient-to-b from-gray-600/50 via-transparent to-gray-600/50 shadow-lg shadow-gray-600`}
                 onClick={!recipientFrozen ? () => readMessages(el.username, el) : undefined}>
                 <img
                   src={el.profilePicture}
@@ -162,44 +183,50 @@ const Messages = () => {
         })}
       </div>
       {recipient && (
-        <div className="flex flex-col items-center [&>*]:my-2">
+        <div className="flex flex-col items-center [&>*]:my-2 m-5 p-5 rounded-lg bg-gradient-to-b from-gray-600/50 via-transparent to-gray-600/50">
           <img
             src={
               recipient.profilePicture ||
               "https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/system.jpg"
             }
             alt="profilePic"
-            className="w-auto h-auto max-w-[15rem] max-h-[15rem]"
+            className="w-auto h-auto max-w-[15rem] max-h-[15rem] pb-10"
           />
-          {messageData?.map((el) => {
-            if (
-              ((el.sender === curUsername && el.recipient === recipient?.username) ||
-                (el.recipient === curUsername && el.sender === recipient?.username) ||
-                (el.sender === curUsername &&
-                  el.recipient === curUsername &&
-                  recipient === "system")) &&
-              !senderFrozen &&
-              !recipientFrozen
-            ) {
-              return (
-                <Message
-                  key={el.id}
-                  id={el.id}
-                  sender={el.sender}
-                  recipient={el.recipient}
-                  message={el.message}
-                  system={el.system}
-                  createdAt={el.createdAt}
-                  profilePicture={
-                    el.sender === curUsername
-                      ? curUser?.profilePicture
-                      : recipient?.profilePicture ||
-                        "https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/system.jpg"
-                  }
-                />
-              );
-            }
-          })}
+          {anyMessages ? (
+            messageData?.map((el) => {
+              if (
+                ((el.sender === curUsername && el.recipient === recipient?.username) ||
+                  (el.recipient === curUsername && el.sender === recipient?.username) ||
+                  (el.sender === curUsername &&
+                    el.recipient === curUsername &&
+                    recipient === "system")) &&
+                !senderFrozen &&
+                !recipientFrozen
+              ) {
+                return (
+                  <Message
+                    key={el.id}
+                    id={el.id}
+                    sender={el.sender}
+                    recipient={el.recipient}
+                    message={el.message}
+                    system={el.system}
+                    createdAt={el.createdAt}
+                    profilePicture={
+                      el.sender === curUsername
+                        ? curUser?.profilePicture
+                        : recipient?.profilePicture ||
+                          "https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/system.jpg"
+                    }
+                  />
+                );
+              }
+            })
+          ) : (
+            <p className="text-[1.1rem]">
+              You have no messages with {recipient.firstName} {recipient.lastName}
+            </p>
+          )}
           {recipient !== "system" && !senderFrozen && !recipientFrozen && (
             <Form className="flex items-center">
               <textarea
