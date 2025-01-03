@@ -8,8 +8,7 @@ import { v4 as uuid } from "uuid";
 import { BsFillFileImageFill, BsTrashFill } from "react-icons/bs";
 import { FcVip } from "react-icons/fc";
 import { api } from "../core/api";
-import { createClient } from "@supabase/supabase-js";
-import { supStorageURL, supStorageKEY } from "../core/supabaseStorage";
+import { supabase } from "../core/supabase";
 import Items from "../pages/items";
 
 const Users = (props) => {
@@ -37,8 +36,6 @@ const Users = (props) => {
   const [type, setType] = useState("sell");
   const [quantity, setQuantity] = useState(1);
   const inputValueRef = useRef(null);
-
-  const supabase = createClient(supStorageURL, supStorageKEY);
 
   const handleFileChange = (e) => {
     console.log(e.target.files[0]);

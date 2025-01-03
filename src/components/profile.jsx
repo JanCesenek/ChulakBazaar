@@ -4,8 +4,7 @@ import { api } from "../core/api";
 import { useUpdate } from "../hooks/use-update";
 import { BsStarFill, BsStarHalf, BsStar, BsTrashFill } from "react-icons/bs";
 import { GiCrossedSwords, GiTwoCoins, GiNinjaHead, GiClusterBomb } from "react-icons/gi";
-import { createClient } from "@supabase/supabase-js";
-import { supStorageURL, supStorageKEY } from "../core/supabaseStorage";
+import { supabase } from "../core/supabase";
 import Loading from "./custom/loading";
 import Button from "./custom/button";
 
@@ -37,9 +36,6 @@ const Profile = (props) => {
   const alreadyReviewed = reviewsData?.find(
     (el) => el.recipient === props.username && el.sender === curUser
   );
-
-  // Supabase client - needed for uploading imgs to a database
-  const supabase = createClient(supStorageURL, supStorageKEY);
 
   // Removes a token upon logging out
   const removeBearerToken = () => {

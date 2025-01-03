@@ -5,8 +5,7 @@ import { FaUserTie } from "react-icons/fa";
 import { useUpdate } from "../hooks/use-update";
 import Loading from "./custom/loading";
 import { api } from "../core/api";
-import { createClient } from "@supabase/supabase-js";
-import { supStorageKEY, supStorageURL } from "../core/supabaseStorage";
+import { supabase } from "../core/supabase";
 
 const Item = (props) => {
   const { data, isLoading } = useUpdate("/users");
@@ -18,8 +17,6 @@ const Item = (props) => {
   const admin = curUser?.admin;
 
   const fullName = seller?.firstName + " " + seller?.lastName;
-
-  const supabase = createClient(supStorageURL, supStorageKEY);
 
   const deleteItem = async () => {
     if (window.confirm("Really wanna delete the item?")) {
