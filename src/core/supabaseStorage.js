@@ -1,3 +1,5 @@
+import { createClient } from "@supabase/supabase-js";
+
 const supStorageURL = "https://cxfluuggeeoujjwckzuu.supabase.co";
 
 const supStorageKEY =
