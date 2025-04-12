@@ -4,6 +4,7 @@ import { api } from "../core/api";
 import { useUpdate } from "../hooks/use-update";
 import Loading from "./custom/loading";
 import { GiCircleSparks } from "react-icons/gi";
+import GateClose from "../audio/GateClose.mp3";
 
 const MainNavigation = (props) => {
   const { data, isLoading } = useUpdate("/messages");
@@ -17,6 +18,8 @@ const MainNavigation = (props) => {
       removeBearerToken();
       localStorage.clear();
       props.setLog();
+      const audio = new Audio(GateClose);
+      audio.play();
     } else e.preventDefault();
   };
 
@@ -25,7 +28,7 @@ const MainNavigation = (props) => {
   const unreadMessages = data?.find((el) => el.recipient === curUsername && !el.read);
 
   return (
-    <nav className="flex justify-around w-full mt-4 text-[1.5rem]">
+    <nav className="flex justify-around w-4/5 mt-4 text-[1.5rem]">
       <NavLink
         className={({ isActive }) => (isActive ? "text-yellow-500 underline" : undefined)}
         to="/">
@@ -48,7 +51,10 @@ const MainNavigation = (props) => {
         {unreadMessages && <GiCircleSparks className="w-5 h-5 text-yellow-400 animate-pulse" />}
       </NavLink>
       {props.log ? (
-        <NavLink className="border border-white px-2 rounded-md" onClick={logOut} to="/auth">
+        <NavLink
+          className="bg-black px-2 rounded-md shadow-md shadow-yellow-900 border border-yellow-400/20"
+          onClick={logOut}
+          to="/auth">
           Log Out
         </NavLink>
       ) : (

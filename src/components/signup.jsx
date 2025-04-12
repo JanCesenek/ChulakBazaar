@@ -1,16 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { Form, useNavigate } from "react-router-dom";
 import Button from "./custom/button";
 import { api } from "../core/api";
-import { supabase } from "../core/supabase";
+import supabase from "../core/supabase";
 import UseInput from "../hooks/use-input";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { BsFillEyeFill, BsFillEyeSlashFill, BsFillFileImageFill } from "react-icons/bs";
 import { useUpdate } from "../hooks/use-update";
 import Submitting from "./custom/submitting";
 import { v4 as uuid } from "uuid";
+import { NotificationContext } from "../context/NotificationContext";
+import { FaSpaceShuttle } from "react-icons/fa";
+import { GiRadioactive } from "react-icons/gi";
 
 const SignUp = (props) => {
+  const { notifyContext, setStatus } = useContext(NotificationContext);
+
   // Variables ensuring correct validation in frontend, won't allow user to submit a form until conditions are met
   const {
     value: firstNameValue,
@@ -102,7 +107,8 @@ const SignUp = (props) => {
     setGender("M");
   };
 
-  const createNewUser = async () => {
+  const createNewUser = async (e) => {
+    e.preventDefault();
     const uniqueID = uuid();
     const firstName = firstNameValue[0]?.toUpperCase() + firstNameValue?.slice(1).toLowerCase();
     const lastName = lastNameValue[0]?.toUpperCase() + lastNameValue?.slice(1).toLowerCase();
@@ -148,9 +154,7 @@ const SignUp = (props) => {
         ? `https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/${uniqueID}`
         : defaultPic,
     };
-    console.log("Checkpoint 1");
     setIsSubmitting(true);
-    console.log("Checkpoint 2");
     await api
       .post("/signup", postReqPayload)
       .then(async (res) => {
@@ -159,21 +163,36 @@ const SignUp = (props) => {
         addBearerToken(token);
         localStorage.setItem("token", token);
         localStorage.setItem("curUser", username);
+        setStatus("success");
+        notifyContext(
+          <div className="flex items-center">
+            <FaSpaceShuttle className="mr-2" />{" "}
+            <span>Welcome to the businessman club, {username}!</span>
+          </div>,
+          "login"
+        );
         resetForm();
-        navigate("/");
+        navigate("/users");
         props.setLog();
       })
-      .catch((err) => console.log(`Post req err - ${err}`));
-    console.log("Checkpoint 3");
+      .catch((err) => {
+        console.log(`Post req err - ${err}`);
+        setStatus("error");
+        notifyContext(
+          <div className="flex items-center">
+            <GiRadioactive className="mr-2" /> <span>Invalid credentials!</span>
+          </div>,
+          "error"
+        );
+      });
     setIsSubmitting(false);
-    console.log("Checkpoint 4");
   };
 
   const validForm = firstNameIsValid && lastNameIsValid && usernameIsValid && passwordIsValid;
 
   return (
     <div className="flex flex-col items-center text-[1.3rem]">
-      <div className="w-[50rem] mt-10 bg-black bg-opacity-50 px-5 py-2 rounded-2xl border border-white">
+      <div className="w-[50rem] mt-10 bg-black/80 p-10 rounded-lg border border-yellow-400/20 shadow-lg shadow-yellow-400/50">
         <h2 className="text-[2rem] text-center">Validation rules:</h2>
         <p>First name, Last name: 2-30 characters, letters only</p>
         <p>Username: 6-16 characters, upper+lowercase and at least one number</p>
@@ -185,8 +204,8 @@ const SignUp = (props) => {
           Note: It won't be possible to submit the form until the conditions are met!
         </p>
       </div>
-      <div className="w-[50rem] border rounded-md mt-10 bg-black bg-opacity-50">
-        <Form method="post" className="flex flex-col items-start [&>*]:my-1 p-2 text-[1.8rem]">
+      <div className="w-[50rem] border border-yellow-400/20 rounded-lg shadow-lg shadow-yellow-400/50 mt-10 p-10 bg-black/80">
+        <Form method="post" className="flex flex-col items-start [&>*]:my-2 p-2 text-[1.8rem]">
           <div className="flex">
             <label htmlFor="firstName" className="min-w-[15rem] ml-2">
               First name:
@@ -198,7 +217,7 @@ const SignUp = (props) => {
               value={firstNameValue}
               onChange={firstNameChangeHandler}
               onBlur={firstNameBlurHandler}
-              className={`bg-transparent border border-white ${
+              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none ${
                 firstNameHasError && "!border-red-600"
               }`}
             />
@@ -214,7 +233,7 @@ const SignUp = (props) => {
               value={lastNameValue}
               onChange={lastNameChangeHandler}
               onBlur={lastNameBlurHandler}
-              className={`bg-transparent border border-white ${
+              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none ${
                 lastNameHasError && "!border-red-600"
               }`}
             />
@@ -230,7 +249,7 @@ const SignUp = (props) => {
               value={usernameValue}
               onChange={usernameChangeHandler}
               onBlur={usernameBlurHandler}
-              className={`bg-transparent border border-white ${
+              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none ${
                 usernameHasError && "!border-red-600"
               }`}
             />
@@ -246,7 +265,7 @@ const SignUp = (props) => {
               value={passwordValue}
               onChange={passwordChangeHandler}
               onBlur={passwordBlurHandler}
-              className={`bg-transparent border border-white ${
+              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none ${
                 passwordHasError && "!border-red-600"
               }`}
             />
@@ -296,7 +315,7 @@ const SignUp = (props) => {
               id="gender"
               value={gender}
               onChange={(e) => setGender(e.target.value)}
-              className="text-black">
+              className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none">
               <option value="M">M</option>
               <option value="F">F</option>
             </select>
@@ -313,9 +332,9 @@ const SignUp = (props) => {
       </div>
       {isSubmitting && <Submitting />}
       <p
-        className="mt-5 text-yellow-500 underline hover:cursor-pointer text-[1.5rem]"
+        className="my-10 underline hover:cursor-pointer text-[1.5rem] p-10 rounded-md bg-black/80"
         onClick={props.link}>
-        Back
+        Already have an account? Click here to log in.
       </p>
     </div>
   );

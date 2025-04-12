@@ -2,11 +2,11 @@ import React from "react";
 
 const Intro = () => {
   return (
-    <div className="mt-10 flex flex-col items-center bg-black/70 rounded-lg shadow-yellow-400/50 shadow-md w-[50rem] sm:w-[70rem] p-5 [&>*]:my-5">
+    <div className="mt-10 flex flex-col items-center bg-gradient-to-b from-black/20 via-black/90 to-black rounded-lg shadow-black shadow-md w-full sm:w-4/5 p-5 [&>*]:my-5 text-[1.5rem] sm:text-[2rem]">
       <img
         src="https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/sholvaArt.jpg"
         alt="sholva"
-        className="w-auto h-auto max-w-[20rem] max-h-[20rem] rounded-lg"
+        className="w-auto h-auto max-w-[30rem] max-h-[30rem] rounded-lg"
       />
       <p className="mx-20">
         Tek'ma'tek, ya duru arik kek onac! My name is Shol'va Teal'c and I'm the first free Jaffa,

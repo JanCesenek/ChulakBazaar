@@ -1,11 +1,17 @@
-import React, { useState } from "react";
-import { GiCoins, GiAbstract010, GiBangingGavel } from "react-icons/gi";
+import React, { useState, useContext } from "react";
+import { GiCoins, GiAbstract010, GiBangingGavel, GiTwoCoins } from "react-icons/gi";
+import { IoPersonCircle } from "react-icons/io5";
 import { useUpdate } from "../hooks/use-update";
 import Loading from "./custom/loading";
 import Button from "./custom/button";
 import { api } from "../core/api";
+import { NotificationContext } from "../context/NotificationContext";
+import { FaSpaceShuttle } from "react-icons/fa";
+import { GiRadioactive } from "react-icons/gi";
 
 const ItemDetail = (props) => {
+  const { notifyContext, setStatus } = useContext(NotificationContext);
+
   const { data, refetch: refetchUsers, isLoading } = useUpdate("/users");
   const { refetch: refetchItems, isLoading: itemsLoading } = useUpdate("/items");
   const {
@@ -23,7 +29,9 @@ const ItemDetail = (props) => {
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(props.price);
   const [pcs, setPcs] = useState(props.quantity);
+
   if (loading) return <Loading />;
+
   const seller = data?.find((el) => el.username === props.seller);
   const token = localStorage.getItem("token");
   const curUsername = localStorage.getItem("curUser");
@@ -57,8 +65,29 @@ const ItemDetail = (props) => {
           "Content-Type": "application/json",
         },
       })
-      .then(() => refetchData())
-      .catch((err) => console.log(`Post req - ${err}`));
+      .then(() => {
+        refetchData();
+        setStatus("success");
+        notifyContext(
+          <div className="flex items-center">
+            <FaSpaceShuttle className="mr-2" />
+            <span>
+              {e === "sell" ? "Sold" : e === "bid" ? "Bid" : "Bought"} {props.name}!
+            </span>
+          </div>,
+          "success"
+        );
+      })
+      .catch((err) => {
+        console.log(`Post req - ${err}`);
+        setStatus("error");
+        notifyContext(
+          <div className="flex items-center">
+            <GiRadioactive className="mr-2" /> <span>Transaction failed!</span>
+          </div>,
+          "error"
+        );
+      });
     setTransactionInProgress(false);
   };
 
@@ -69,6 +98,7 @@ const ItemDetail = (props) => {
       quantity: editedQuantity,
       description: editedDescription,
     };
+    setTransactionInProgress(true);
     await api
       .patch(`/items/${id}`, restock ? { quantity, restock } : patchReqPayload, {
         headers: {
@@ -77,13 +107,19 @@ const ItemDetail = (props) => {
         },
       })
       .then(async () => await refetchItems())
-      .catch((err) => console.log(`Patch req - ${err}`));
+      .catch((err) => console.log(`Patch req - ${err}`))
+      .finally(() => {
+        setTransactionInProgress(false);
+      });
     restock && setPcs(pcs + quantity);
     !restock && props.back();
   };
 
   return editItem ? (
-    <div className="my-10 flex flex-col w-[50rem] sm:w-[60rem] bg-black/70 rounded-lg shadow-yellow-400/50 shadow-md [&>*]:my-2 text-[1.7rem] p-5">
+    <div
+      className={`my-10 w-[90%] flex flex-col bg-black/90 rounded-lg shadow-yellow-400/50 shadow-md [&>*]:my-2 text-[1.7rem] p-5 ${
+        transactionInProgress && "cursor-not-allowed opacity-70 pointer-events-none"
+      }`}>
       <div className="flex items-center">
         <label htmlFor="name" className="w-[15rem]">
           Name:
@@ -92,7 +128,7 @@ const ItemDetail = (props) => {
           type="text"
           value={editedName}
           onChange={(e) => setEditedName(e.target.value)}
-          className="bg-transparent border border-white rounded-md"
+          className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md"
         />
       </div>
       <div className="flex items-center">
@@ -106,7 +142,7 @@ const ItemDetail = (props) => {
           step="100"
           value={editedPrice}
           onChange={(e) => setEditedPrice(+e.target.value)}
-          className="bg-transparent border border-white rounded-md"
+          className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md max-w-[15rem]"
         />
       </div>
       <div className="flex items-center">
@@ -119,7 +155,7 @@ const ItemDetail = (props) => {
           id="quantity"
           value={editedQuantity}
           onChange={(e) => setEditedQuantity(+e.target.value)}
-          className="bg-transparent border border-white rounded-md"
+          className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md max-w-[10rem]"
         />
       </div>
       <div className="flex items-center">
@@ -131,7 +167,7 @@ const ItemDetail = (props) => {
           id="description"
           value={editedDescription}
           onChange={(e) => setEditedDescription(e.target.value)}
-          className="bg-transparent border border-white rounded-md"
+          className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md"
           rows="5"
           cols="30"
         />
@@ -144,26 +180,19 @@ const ItemDetail = (props) => {
       </p>
     </div>
   ) : (
-    <div className="mt-10 flex flex-col items-center w-[50rem] sm:w-[60rem] bg-black/70 rounded-lg shadow-yellow-400/50 shadow-md [&>*]:my-5 text-[1.7rem]">
+    <div
+      className={`my-10 flex flex-col items-center w-[90%] bg-black/90 rounded-lg shadow-yellow-900 shadow-md [&>*]:my-5 text-[2.5rem] ${
+        transactionInProgress && "cursor-not-allowed opacity-70 pointer-events-none"
+      }`}>
+      <div className="flex items-center text-[3.5rem] font-bold [&>*]:mx-2 !my-20">
+        <GiAbstract010 /> <span>{props.name}</span>
+      </div>
       <img
         src={props.image}
         alt="some img"
         className="w-auto h-auto max-w-[30rem] max-h-[30rem] rounded-lg"
       />
-      <p className="flex items-center w-2/3 justify-between">
-        <span>
-          {seller?.firstName} {seller?.lastName}
-        </span>
-        <img
-          src={seller?.profilePicture}
-          alt="some img"
-          className="w-auto h-auto max-w-[15rem] max-h-[15rem] rounded-lg"
-        />
-      </p>
-      <p className="flex items-center w-1/2 justify-between">
-        <GiAbstract010 /> {props.name}
-      </p>
-      <p className="flex items-center w-1/2 justify-between">
+      <p className="flex items-center w-[80%] sm:w-2/3 lg:w-1/2 justify-between">
         <GiCoins /> {price}
       </p>
       {props.type === "bid" && curBid && (
@@ -172,12 +201,21 @@ const ItemDetail = (props) => {
         </p>
       )}
       {props.type === "sell" && (
-        <p className="flex items-center w-1/2 justify-between">
+        <p className="flex items-center w-[80%] sm:w-2/3 lg:w-1/2 justify-between">
           <span>pcs</span>
           <span>{pcs}</span>
         </p>
       )}
-      <p className="mx-5">{props.description}</p>
+      <div className="flex items-center w-[80%] sm:w-2/3 lg:w-1/2 justify-between text-[2.5rem] font-bold">
+        <div className="flex items-center">
+          <IoPersonCircle />
+          <GiTwoCoins />
+        </div>
+        <div>
+          {seller?.firstName} {seller?.lastName}
+        </div>
+      </div>
+      <p className="mx-20 py-20 border-t">{props.description}</p>
       {props.quantity === 0 && (
         <p className="text-yellow-400 mx-5 flex items-center text-[2rem]">
           Sold out! <GiBangingGavel className="ml-2" />
@@ -202,14 +240,14 @@ const ItemDetail = (props) => {
               value={quantity}
               onChange={(e) => setQuantity(+e.target.value)}
               step="1"
-              className="bg-transparent border border-white rounded-md"
+              className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md"
             />
           </div>
         ) : (
           <div className="flex justify-center">
             <Button
               title={transactionInProgress ? "Bidding..." : "Bid"}
-              onClick={itemHandler}
+              onClick={() => itemHandler("bid")}
               classes={transactionInProgress && "pointer-events-none opacity-50"}
             />
             <input
@@ -218,7 +256,7 @@ const ItemDetail = (props) => {
               onChange={(e) => setPrice(+e.target.value)}
               min={props.price}
               step="1000"
-              className="bg-transparent border border-white rounded-md ml-2 w-[10rem]"
+              className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md ml-10 w-[15rem]"
             />
           </div>
         ))}
@@ -236,7 +274,10 @@ const ItemDetail = (props) => {
         )}
       {props.own && props.type === "sell" && props.profile === curUsername && (
         <div className="flex justify-around">
-          <Button title="Restock" onClick={() => updateItem(props.id, "restock")} />
+          <Button
+            title={transactionInProgress ? "Restocking..." : "Restock"}
+            onClick={() => updateItem(props.id, "restock")}
+          />
           <input
             type="number"
             value={quantity}
@@ -244,11 +285,11 @@ const ItemDetail = (props) => {
             min="1"
             max="1000"
             step="1"
-            className="bg-transparent border border-white rounded-md ml-5"
+            className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 ml-10"
           />
         </div>
       )}
-      <p className="underline text-yellow-400 hover:cursor-pointer" onClick={props.back}>
+      <p className="!mt-10 underline text-yellow-400 hover:cursor-pointer" onClick={props.back}>
         Back
       </p>
     </div>

@@ -1,21 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../core/api";
 import { useUpdate } from "../hooks/use-update";
 import { BsStarFill, BsStarHalf, BsStar, BsTrashFill } from "react-icons/bs";
-import { GiCrossedSwords, GiTwoCoins, GiNinjaHead, GiClusterBomb } from "react-icons/gi";
-import { supabase } from "../core/supabase";
+import { FaSpaceShuttle } from "react-icons/fa";
+import {
+  GiCrossedSwords,
+  GiTwoCoins,
+  GiNinjaHead,
+  GiClusterBomb,
+  GiRadioactive,
+} from "react-icons/gi";
+import supabase from "../core/supabase";
 import Loading from "./custom/loading";
 import Button from "./custom/button";
+import { NotificationContext } from "../context/NotificationContext";
 
 // User's personal details
 
 const Profile = (props) => {
+  const { notifyContext, setStatus } = useContext(NotificationContext);
+
   const [addReview, setAddReview] = useState(false);
   const [userReviews, setUserReviews] = useState(false);
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(3);
   const [isBeingDeleted, setIsBeingDeleted] = useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
+
   const { data, refetch, isLoading } = useUpdate("/users");
   const { data: transactionsData, isLoading: transactionsLoading } = useUpdate("/transactions");
   const {
@@ -212,6 +225,7 @@ const Profile = (props) => {
       message,
     };
 
+    setSubmitting(true);
     await api
       .post("/reviews", postReqPayload, {
         headers: {
@@ -219,14 +233,36 @@ const Profile = (props) => {
           "Content-Type": "application/json",
         },
       })
-      .then(() => refetchData())
-      .catch((err) => console.log(`Post req - ${err}`));
-    setMessage("");
-    setRating(3);
-    setAddReview(false);
+      .then(() => {
+        refetchData();
+        setStatus("success");
+        notifyContext(
+          <div className="flex items-center">
+            <FaSpaceShuttle className="mr-2" /> <span>Review added!</span>
+          </div>,
+          "success"
+        );
+      })
+      .catch((err) => {
+        console.log(`Post req - ${err}`);
+        setStatus("error");
+        notifyContext(
+          <div className="flex items-center">
+            <GiRadioactive className="mr-2" /> <span>Could not add review!</span>
+          </div>,
+          "error"
+        );
+      })
+      .finally(() => {
+        setMessage("");
+        setRating(3);
+        setAddReview(false);
+        setSubmitting(false);
+      });
   };
 
   const deleteReview = async (id) => {
+    setSubmitting(true);
     await api
       .delete(`/reviews/${id}`, {
         headers: {
@@ -234,8 +270,29 @@ const Profile = (props) => {
           "Content-Type": "application/json",
         },
       })
-      .then(() => refetchData())
-      .catch((err) => console.log(`Delete req - ${err}`));
+      .then(() => {
+        refetchData();
+        setStatus("success");
+        notifyContext(
+          <div className="flex items-center">
+            <GiClusterBomb className="mr-2" /> <span>Review deleted!</span>
+          </div>,
+          "success"
+        );
+      })
+      .catch((err) => {
+        console.log(`Delete req - ${err}`);
+        setStatus("error");
+        notifyContext(
+          <div className="flex items-center">
+            <GiRadioactive className="mr-2" /> <span>Could not delete review!</span>
+          </div>,
+          "error"
+        );
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   // Delete req for deleting a user
@@ -267,10 +324,28 @@ const Profile = (props) => {
           removeBearerToken();
           localStorage.clear();
           props.setLog();
+          setStatus("success");
+          notifyContext(
+            <div className="flex items-center">
+              <GiClusterBomb className="mr-2" /> <span>Account deleted!</span>
+            </div>,
+            "logout"
+          );
           navigate("/auth");
         })
-        .catch((err) => console.log(`Delete req err - ${err}`));
-      setIsBeingDeleted(false);
+        .catch((err) => {
+          console.log(`Delete req err - ${err}`);
+          setStatus("error");
+          notifyContext(
+            <div className="flex items-center">
+              <GiRadioactive className="mr-2" /> <span>Could not delete account!</span>
+            </div>,
+            "error"
+          );
+        })
+        .finally(() => {
+          setIsBeingDeleted(false);
+        });
     } else e.preventDefault();
   };
 
@@ -286,16 +361,10 @@ const Profile = (props) => {
 
   return (
     <div
-      className={`grid justify-items-center relative w-[50rem] grid-cols-[1fr] grid-rows-[18rem,min-content] mt-10 shadow-yellow-400 shadow-md rounded-2xl [&>*]:w-full [&>:nth-child(1)]:rounded-t-2xl [&>:nth-child(2)]:rounded-b-2xl ${
+      className={`grid justify-items-center relative w-[90%] sm:w-2/3 lg:w-1/2 grid-cols-[1fr] grid-rows-[18rem,min-content] gap-y-10 mt-10 p-5 shadow-yellow-600 shadow-lg rounded-2xl [&>*]:w-full [&>:nth-child(1)]:rounded-t-2xl [&>:nth-child(2)]:rounded-b-2xl bg-gradient-to-b from-black/20 via-black/80 to-black/90 ${
         props.admin && "!text-yellow-400"
-      }`}>
-      <div
-        className={`grid grid-cols-2 grid-rows-1 bg-gradient-to-b from-black/70 to-gray-500/70 justify-center items-center`}
-        style={{
-          "--tw-gradient-stops": `var(--tw-gradient-from) 35%, ${
-            props.admin ? "yellow" : "white"
-          }, var(--tw-gradient-to) 65%`,
-        }}>
+      } ${submitting && "cursor-not-allowed opacity-70 pointer-events-none"}`}>
+      <div className={`grid grid-cols-2 grid-rows-1 justify-center items-center`}>
         <h1 className="self-end mb-10 text-3xl px-3 w-[120%] ml-5">
           {props.firstName} {props.lastName}
         </h1>
@@ -314,7 +383,7 @@ const Profile = (props) => {
           </div>
         )}
       </div>
-      <div className="bg-gradient-to-t from-black/70 to-gray-500/70 flex flex-col items-center pb-2 [&>*]:my-2">
+      <div className="flex flex-col items-center pb-2 [&>*]:my-2">
         <div className="flex justify-between w-3/5">
           <div>Items bought/bid on</div>
           <div>{itemsBought()}</div>
@@ -388,7 +457,7 @@ const Profile = (props) => {
         )}
         {reviews && (
           <p
-            className="text-yellow-600 underline hover:cursor-pointer !mt-10"
+            className="text-yellow-600 underline hover:cursor-pointer !my-10"
             onClick={() => setUserReviews(!userReviews)}>
             {userReviews ? "Hide user reviews" : "Show user reviews"}
           </p>
@@ -400,7 +469,7 @@ const Profile = (props) => {
               return (
                 <div
                   key={el.id}
-                  className="flex flex-col bg-black bg-opacity-50 border border-white rounded-md p-5 w-4/5 !my-5 shadow-lg shadow-white/50">
+                  className="flex relative flex-col bg-black bg-opacity-50 rounded-md p-5 w-4/5 !my-10 shadow-lg shadow-yellow-400/50">
                   <div className="flex justify-around items-center border-b pb-2 border-gray-600">
                     <img
                       src={reviewer?.profilePicture}
@@ -415,7 +484,7 @@ const Profile = (props) => {
                   <div className="text-[1.3rem]">{el.message}</div>
                   {el.sender === curUser && (
                     <BsTrashFill
-                      className="self-center w-5 h-5 hover:cursor-pointer text-red-600"
+                      className="absolute top-5 right-5 w-5 h-5 hover:cursor-pointer text-red-600"
                       onClick={() => deleteReview(el.id)}
                     />
                   )}

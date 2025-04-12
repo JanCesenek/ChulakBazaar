@@ -10,6 +10,7 @@ import Auth from "./pages/auth";
 import { api } from "./core/api";
 import { BsHourglassSplit } from "react-icons/bs";
 import { useRouteError } from "react-router-dom";
+import { NotificationProvider } from "./context/NotificationContext";
 
 function App() {
   const loggedIn = localStorage.getItem("token");
@@ -56,13 +57,16 @@ function App() {
         {
           path: "/auth",
           element: <Auth setLog={() => setLog(!log)} />,
-          method: ["GET", "POST"],
         },
       ],
     },
   ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <NotificationProvider>
+      <RouterProvider router={router} />
+    </NotificationProvider>
+  );
 }
 
 export default App;

@@ -9,7 +9,11 @@ const Submitting = () => {
         <span>Oh, well, this is gonna take some time. In the meantime, coffee?</span>
         <GiCoffeePot className="ml-2" />
       </h1>
-      <img src={tyjelk} alt="ANO, to je ON" className="w-[50rem] h-[25rem] rounded-[1rem]" />
+      <img
+        src={tyjelk}
+        alt="ANO, to je ON"
+        className="w-[50rem] h-[25rem] rounded-[1rem] shadow-lg shadow-yellow-400/50"
+      />
     </div>
   );
 };

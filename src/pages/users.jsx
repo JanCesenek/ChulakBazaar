@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { Form } from "react-router-dom";
 import { useUpdate } from "../hooks/use-update";
 import Profile from "../components/profile";
@@ -7,11 +7,16 @@ import Button from "../components/custom/button";
 import { v4 as uuid } from "uuid";
 import { BsFillFileImageFill, BsTrashFill } from "react-icons/bs";
 import { FcVip } from "react-icons/fc";
+import { FaSpaceShuttle } from "react-icons/fa";
+import { GiClusterBomb, GiRadioactive } from "react-icons/gi";
 import { api } from "../core/api";
-import { supabase } from "../core/supabase";
+import supabase from "../core/supabase";
 import Items from "../pages/items";
+import { NotificationContext } from "../context/NotificationContext";
 
 const Users = (props) => {
+  const { notifyContext, setStatus } = useContext(NotificationContext);
+
   const { data, refetch: refetchUsers, isLoading } = useUpdate("/users");
   const { data: itemData, refetch, isLoading: itemsLoading } = useUpdate("/items");
   const { data: transactionData, isLoading: transactionsLoading } = useUpdate("/transactions");
@@ -36,6 +41,8 @@ const Users = (props) => {
   const [type, setType] = useState("sell");
   const [quantity, setQuantity] = useState(1);
   const inputValueRef = useRef(null);
+
+  const [submitting, setSubmitting] = useState(false);
 
   const handleFileChange = (e) => {
     console.log(e.target.files[0]);
@@ -79,6 +86,7 @@ const Users = (props) => {
       seller: curUsername,
     };
 
+    setSubmitting(true);
     await api
       .post("/items", postReqPayload, {
         headers: {
@@ -86,9 +94,36 @@ const Users = (props) => {
           "Content-Type": "application/json",
         },
       })
-      .then(async () => await refetch())
-      .catch((err) => console.log(`Post req - ${err}`));
-    setAddItem(false);
+      .then(async () => {
+        await refetch();
+        setStatus("success");
+        notifyContext(
+          <div className="flex items-center">
+            <FaSpaceShuttle className="mr-2" /> <span>Item created!</span>
+          </div>,
+          "success"
+        );
+      })
+      .catch((err) => {
+        console.log(`Post req - ${err}`);
+        setStatus("error");
+        notifyContext(
+          <div className="flex items-center">
+            <GiRadioactive className="mr-2" /> <span>Failed to create item!</span>
+          </div>,
+          "error"
+        );
+      })
+      .finally(() => {
+        setName("");
+        setImage(null);
+        setDescription("");
+        setType("sell");
+        setQuantity(1);
+        inputValueRef.current.value = null;
+        setAddItem(false);
+        setSubmitting(false);
+      });
   };
 
   const getMonth = (m) => {
@@ -97,6 +132,7 @@ const Users = (props) => {
 
   const deleteUser = async (id) => {
     if (window.confirm(`Really wanna delete ${id}?`)) {
+      setSubmitting(true);
       await api
         .delete(`/users/${id}`, {
           headers: {
@@ -104,8 +140,29 @@ const Users = (props) => {
             "Content-Type": "application/json",
           },
         })
-        .then(async () => await refetchUsers())
-        .catch((err) => console.log(`Delete req - ${err}`));
+        .then(async () => {
+          await refetchUsers();
+          setStatus("success");
+          notifyContext(
+            <div className="flex items-center">
+              <GiClusterBomb className="mr-2" /> <span>User deleted!</span>
+            </div>,
+            "success"
+          );
+        })
+        .catch((err) => {
+          console.log(`Delete req - ${err}`);
+          setStatus("error");
+          notifyContext(
+            <div className="flex items-center">
+              <GiRadioactive className="mr-2" /> <span>Failed to delete user!</span>
+            </div>,
+            "error"
+          );
+        })
+        .finally(() => {
+          setSubmitting(false);
+        });
     }
   };
 
@@ -119,7 +176,10 @@ const Users = (props) => {
   if (loading) return <Loading />;
 
   return profile ? (
-    <div className="mt-10 w-4/5 min-h-[30rem] flex flex-col items-center">
+    <div
+      className={`mt-10 w-[80%] min-h-[30rem] flex flex-col items-center ${
+        submitting && "cursor-not-allowed opacity-70 pointer-events-none"
+      }`}>
       <p
         className="text-yellow-400 text-[1.5rem] underline hover:cursor-pointer mt-10"
         onClick={() => setProfile(false)}>
@@ -136,13 +196,15 @@ const Users = (props) => {
         admin={profile?.admin}
         setLog={props.setLog}
       />
-      {curUsername === profile.username && (
-        <p onClick={() => setAddItem(!addItem)} className="mt-10 underline hover:cursor-pointer">
+      {curUsername === profile.username && !ownItems && !ownTransactions && (
+        <p
+          onClick={() => setAddItem(!addItem)}
+          className="mt-10 underline hover:cursor-pointer p-10 bg-black/80 rounded-md">
           {addItem ? "Hide" : "Add Item"}
         </p>
       )}
       {addItem && (
-        <Form className="mt-10 border border-white rounded-lg bg-black bg-opacity-50 w-[40rem] min-h-[20rem] flex flex-col text-[1.8rem] p-5 [&>*]:my-2">
+        <Form className="my-10 rounded-lg bg-black/90 w-auto min-h-[20rem] flex flex-col text-[1.8rem] shadow-lg shadow-yellow-900 p-10 [&>*]:my-2">
           <div className="flex">
             <label htmlFor="name" className="mr-5">
               Name:
@@ -153,7 +215,7 @@ const Users = (props) => {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-transparent border border-white rounded-md"
+              className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none"
             />
           </div>
           <div className="flex items-center">
@@ -173,7 +235,9 @@ const Users = (props) => {
             />
           </div>
           <div className="flex items-center">
-            <label htmlFor="description">Description:</label>
+            <label htmlFor="description" className="mr-5">
+              Description:
+            </label>
             <textarea
               name="description"
               id="description"
@@ -181,23 +245,27 @@ const Users = (props) => {
               onChange={(e) => setDescription(e.target.value)}
               cols="30"
               rows="5"
-              className="bg-transparent border border-white rounded-md"
+              className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none"
             />
           </div>
           <div>
-            <label htmlFor="type">Type:</label>
+            <label htmlFor="type" className="mr-5">
+              Type:
+            </label>
             <select
               name="type"
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="text-black">
+              className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none">
               <option value="sell">sell</option>
               <option value="bid">bid</option>
             </select>
           </div>
           <div>
-            <label htmlFor="price">Price:</label>
+            <label htmlFor="price" className="mr-5">
+              Price:
+            </label>
             <input
               type="number"
               name="price"
@@ -207,12 +275,14 @@ const Users = (props) => {
               min="100"
               max="10000000"
               step="100"
-              className="bg-transparent border border-white rounded-md"
+              className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none"
             />
           </div>
           {type !== "bid" && (
             <div>
-              <label htmlFor="quantity">Quantity:</label>
+              <label htmlFor="quantity" className="mr-5">
+                Quantity:
+              </label>
               <input
                 type="number"
                 name="quantity"
@@ -222,7 +292,7 @@ const Users = (props) => {
                 min="1"
                 max="1000"
                 step="1"
-                className="bg-transparent border border-white rounded-md"
+                className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none"
               />
             </div>
           )}
@@ -233,142 +303,163 @@ const Users = (props) => {
           />
         </Form>
       )}
-      {anyItems && (
-        <p className="mt-10 underline hover:cursor-pointer" onClick={() => setOwnItems(!ownItems)}>
+      {anyItems && !addItem && !ownTransactions && (
+        <p
+          className="my-5 underline hover:cursor-pointer p-10 bg-black/80 rounded-md"
+          onClick={() => setOwnItems(!ownItems)}>
           {ownItems ? "Hide own items" : "List own items"}
         </p>
       )}
       {ownItems && <Items own curUser={profile?.username} />}
-      {curUsername === profile.username && anyTransactions && (
+      {curUsername === profile.username && anyTransactions && !addItem && !ownItems && (
         <p
-          className="mt-10 underline hover:cursor-pointer"
+          className="my-5 underline hover:cursor-pointer p-10 bg-black/80 rounded-md"
           onClick={() => setOwnTransactions(!ownTransactions)}>
           {ownTransactions ? "Hide own transactions" : "List own transactions"}
         </p>
       )}
       {ownTransactions && transactionData?.length > 0 && (
-        <div className="mt-5 flex text-[1.2rem] min-w-[70rem] [@media(max-width:600px)]:w-[50rem] [&>*]:w-auto">
-          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
-            <div className="flex justify-around bg-black">Name</div>
-            {transactionData?.map((el) => {
-              if (el.buyer === profile?.username || el.seller === profile?.username) {
-                const findItem = itemData?.find((arg) => arg.id === el.item);
-                return (
-                  <div
-                    key={el.id}
-                    className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
-                    }`}>
-                    <p>{findItem?.name}</p>
-                  </div>
-                );
-              }
-            })}
-          </div>
-          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
-            <div className="flex justify-around bg-black">Quantity</div>
-            {transactionData?.map((el) => {
-              if (el.buyer === profile?.username || el.seller === profile?.username) {
-                return (
-                  <div
-                    key={el.id}
-                    className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
-                    }`}>
-                    <p>{el.quantity}</p>
-                  </div>
-                );
-              }
-            })}
-          </div>
-          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
-            <div className="flex justify-around bg-black">Total price</div>
-            {transactionData?.map((el) => {
-              if (el.buyer === profile?.username || el.seller === profile?.username) {
-                return (
-                  <div
-                    key={el.id}
-                    className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
-                    }`}>
-                    <p>{el.total}</p>
-                  </div>
-                );
-              }
-            })}
-          </div>
-          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
-            <div className="flex justify-around bg-black">Type</div>
-            {transactionData?.map((el) => {
-              if (el.buyer === profile?.username || el.seller === profile?.username) {
-                return (
-                  <div
-                    key={el.id}
-                    className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
-                    }`}>
-                    <p>{el.type}</p>
-                  </div>
-                );
-              }
-            })}
-          </div>
-          <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full [&>*]:px-5">
-            <div className="flex justify-around bg-black">Buyer</div>
-            {transactionData?.map((el) => {
-              if (el.buyer === profile?.username || el.seller === profile?.username) {
-                return (
-                  <div
-                    key={el.id}
-                    className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
-                    }`}>
-                    <p>{el.buyer}</p>
-                  </div>
-                );
-              }
-            })}
-          </div>
-          <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full [&>*]:px-5">
-            <div className="flex justify-around bg-black">Seller</div>
-            {transactionData?.map((el) => {
-              if (el.buyer === profile?.username || el.seller === profile?.username) {
-                return (
-                  <div
-                    key={el.id}
-                    className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
-                    }`}>
-                    <p>{el.seller}</p>
-                  </div>
-                );
-              }
-            })}
-          </div>
-          <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
-            <div className="flex justify-around bg-black">Date</div>
-            {transactionData?.map((el) => {
-              if (el.buyer === profile?.username || el.seller === profile?.username) {
-                const createdAt = new Date(el.createdAt);
-                return (
-                  <div
-                    key={el.id}
-                    className={`flex justify-around ${
-                      el.buyer === profile?.username ? "bg-red-600" : "bg-green-600"
-                    }`}>
-                    <p>
-                      {el.createdAt.slice(8, 10)} {getMonth(createdAt)} {el.createdAt.slice(0, 4)}
-                    </p>
-                  </div>
-                );
-              }
-            })}
+        <div className="p-20 bg-black/80 rounded-md flex items-center justify-center">
+          <div className="mt-5 flex text-[0.8rem] lg:text-[1.2rem] [&>*]:w-auto">
+            <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
+              <div className="flex justify-around bg-black">Name</div>
+              {transactionData?.map((el) => {
+                if (el.buyer === profile?.username || el.seller === profile?.username) {
+                  const findItem = itemData?.find((arg) => arg.id === el.item);
+                  return (
+                    <div
+                      key={el.id}
+                      className={`flex justify-around ${
+                        el.buyer === profile?.username
+                          ? "bg-yellow-200 text-black"
+                          : "bg-yellow-600"
+                      }`}>
+                      <p>{findItem?.name}</p>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+            <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
+              <div className="flex justify-around bg-black">Quantity</div>
+              {transactionData?.map((el) => {
+                if (el.buyer === profile?.username || el.seller === profile?.username) {
+                  return (
+                    <div
+                      key={el.id}
+                      className={`flex justify-around ${
+                        el.buyer === profile?.username
+                          ? "bg-yellow-200 text-black"
+                          : "bg-yellow-600"
+                      }`}>
+                      <p>{el.quantity}</p>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+            <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
+              <div className="flex justify-around bg-black">Total price</div>
+              {transactionData?.map((el) => {
+                if (el.buyer === profile?.username || el.seller === profile?.username) {
+                  return (
+                    <div
+                      key={el.id}
+                      className={`flex justify-around ${
+                        el.buyer === profile?.username
+                          ? "bg-yellow-200 text-black"
+                          : "bg-yellow-600"
+                      }`}>
+                      <p>{el.total}</p>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+            <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
+              <div className="flex justify-around bg-black">Type</div>
+              {transactionData?.map((el) => {
+                if (el.buyer === profile?.username || el.seller === profile?.username) {
+                  return (
+                    <div
+                      key={el.id}
+                      className={`flex justify-around ${
+                        el.buyer === profile?.username
+                          ? "bg-yellow-200 text-black"
+                          : "bg-yellow-600"
+                      }`}>
+                      <p>{el.type}</p>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+            <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full [&>*]:px-5">
+              <div className="flex justify-around bg-black">Buyer</div>
+              {transactionData?.map((el) => {
+                if (el.buyer === profile?.username || el.seller === profile?.username) {
+                  return (
+                    <div
+                      key={el.id}
+                      className={`flex justify-around ${
+                        el.buyer === profile?.username
+                          ? "bg-yellow-200 text-black"
+                          : "bg-yellow-600"
+                      }`}>
+                      <p>{el.buyer}</p>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+            <div className="flex flex-col [@media(max-width:600px)]:hidden items-start [&>*]:w-full [&>*]:px-5">
+              <div className="flex justify-around bg-black">Seller</div>
+              {transactionData?.map((el) => {
+                if (el.buyer === profile?.username || el.seller === profile?.username) {
+                  return (
+                    <div
+                      key={el.id}
+                      className={`flex justify-around ${
+                        el.buyer === profile?.username
+                          ? "bg-yellow-200 text-black"
+                          : "bg-yellow-600"
+                      }`}>
+                      <p>{el.seller}</p>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+            <div className="flex flex-col items-start [&>*]:w-full [&>*]:px-5">
+              <div className="flex justify-around bg-black">Date</div>
+              {transactionData?.map((el) => {
+                if (el.buyer === profile?.username || el.seller === profile?.username) {
+                  const createdAt = new Date(el.createdAt);
+                  return (
+                    <div
+                      key={el.id}
+                      className={`flex justify-around ${
+                        el.buyer === profile?.username
+                          ? "bg-yellow-200 text-black"
+                          : "bg-yellow-600"
+                      }`}>
+                      <p>
+                        {el.createdAt.slice(8, 10)} {getMonth(createdAt)} {el.createdAt.slice(0, 4)}
+                      </p>
+                    </div>
+                  );
+                }
+              })}
+            </div>
           </div>
         </div>
       )}
     </div>
   ) : (
-    <div className="flex flex-col items-center mt-10">
+    <div
+      className={`flex flex-col items-center mt-10 ${
+        submitting && "cursor-not-allowed opacity-70 pointer-events-none"
+      }`}>
       {curUsername && (
         <p
           className="mt-10 text-yellow-400 underline hover:cursor-pointer"
@@ -386,7 +477,7 @@ const Users = (props) => {
             type="text"
             value={userValue}
             onChange={(e) => setUserValue(e.target.value)}
-            className="bg-transparent border border-white rounded-md mt-5"
+            className="bg-black shadow-md shadow-yellow-400/50 border border-yellow-400/20 rounded-md mt-5 focus:outline-none"
           />
         )}
       </div>
@@ -413,7 +504,7 @@ const Users = (props) => {
         const userPattern = (
           <div
             key={el.id}
-            className={`flex justify-between p-5 items-center bg-gradient-to-b from-gray-600/50 via-black/50 to-gray-600/50 ${getColor()} bg-opacity-50 my-5 shadow-lg shadow-gray-600 rounded-lg min-w-[30rem]`}>
+            className={`flex justify-between p-5 items-center bg-black/90 ${getColor()} my-5 shadow-md shadow-yellow-900 rounded-lg min-w-[30rem] hover:translate-x-2 hover:translate-y-[-0.5rem] hover:shadow-yellow-400`}>
             <span className="flex items-center">
               {el.admin && <FcVip className="w-10 h-10" />}
               <img
@@ -427,7 +518,7 @@ const Users = (props) => {
             </p>
             {curUser?.admin && (
               <BsTrashFill
-                className="text-red-600 hover:cursor-pointer"
+                className="text-red-600 hover:cursor-pointer text-[0.8rem]"
                 onClick={() => deleteUser(el.username)}
               />
             )}

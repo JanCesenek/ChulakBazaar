@@ -13,6 +13,9 @@ const Messages = () => {
   const { data: messageData, refetch, isLoading: messagesLoading } = useUpdate("/messages");
   const [message, setMessage] = useState("");
   const [recipient, setRecipient] = useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
+
   const loading = usersLoading || messagesLoading;
   const curUsername = localStorage.getItem("curUser");
   const curUser = userData?.find((el) => el.username === curUsername);
@@ -46,6 +49,7 @@ const Messages = () => {
       recipient: recipient?.username,
       message,
     };
+    setSubmitting(true);
     await api
       .post("/messages", postReqPayload, {
         headers: {
@@ -54,7 +58,10 @@ const Messages = () => {
         },
       })
       .then(async () => await refetch())
-      .catch((err) => console.log(`Post req - ${err}`));
+      .catch((err) => console.log(`Post req - ${err}`))
+      .finally(() => {
+        setSubmitting(false);
+      });
     setMessage("");
   };
 
@@ -109,12 +116,15 @@ const Messages = () => {
   if (loading) return <Loading />;
 
   return curUsername ? (
-    <div className="mt-10 flex justify-between bg-black/50 w-[100rem] min-h-[50rem] max-w-full [&>*]:w-1/2 rounded-lg">
+    <div
+      className={`mt-10 flex justify-between bg-black/80 w-[100rem] min-h-[50rem] max-w-full [&>*]:w-1/2 rounded-lg shadow-lg shadow-yellow-900 ${
+        submitting && "cursor-not-allowed opacity-70 pointer-events-none"
+      }`}>
       <div className="flex flex-col items-center p-5 [&>*]:my-5">
         <div
-          className={`flex relative justify-between items-center p-5 hover:cursor-pointer w-[25rem] text-[1rem] border border-white rounded-lg bg-gradient-to-b from-gray-600/50 via-transparent to-gray-600/50 shadow-lg shadow-gray-600 ${
+          className={`flex relative justify-between items-center p-5 hover:cursor-pointer w-[25rem] text-[1rem] border border-yellow-900 rounded-lg bg-gradient-to-b from-yellow-900/50 via-transparent to-yellow-900/50 shadow-lg shadow-yellow-900 ${
             !systemMsgCheck && "opacity-50"
-          } ${recipient === "system" && "text-yellow-500 border-yellow-500 shadow-yellow-500"}`}
+          } ${recipient === "system" && "text-yellow-500 !border-yellow-500 !shadow-yellow-500"}`}
           onClick={() => readMessages(curUsername, "system")}>
           <img
             src="https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/system.jpg"
@@ -150,13 +160,13 @@ const Messages = () => {
             return (
               <div
                 key={el.id}
-                className={`flex justify-between relative items-center p-5 border border-white ${
+                className={`flex justify-between relative items-center p-5 border border-yellow-900 ${
                   (senderFrozen || recipientFrozen) && "border-blue-400"
                 } hover:cursor-pointer ${!msgCheck && "opacity-50"} ${
-                  recipientFrozen && "hover:cursor-not-allowed"
+                  recipientFrozen && "hover:cursor-not-allowed pointer-events-none"
                 } ${
-                  recipient === el && "text-yellow-500 border-yellow-500 shadow-yellow-500"
-                } w-[25rem] text-[1rem] rounded-lg bg-gradient-to-b from-gray-600/50 via-transparent to-gray-600/50 shadow-lg shadow-gray-600`}
+                  recipient === el && "text-yellow-500 !border-yellow-500 !shadow-yellow-500"
+                } w-[25rem] text-[1rem] rounded-lg bg-gradient-to-b from-yellow-900/50 via-transparent to-yellow-900/50 shadow-lg shadow-yellow-900`}
                 onClick={!recipientFrozen ? () => readMessages(el.username, el) : undefined}>
                 <img
                   src={el.profilePicture}
@@ -183,14 +193,14 @@ const Messages = () => {
         })}
       </div>
       {recipient && (
-        <div className="flex flex-col items-center [&>*]:my-2 m-5 p-5 rounded-lg bg-gradient-to-b from-gray-600/50 via-transparent to-gray-600/50">
+        <div className="flex flex-col items-center [&>*]:my-2 m-5 p-5 rounded-lg bg-gradient-to-b from-yellow-900/20 via-transparent to-yellow-900/20">
           <img
             src={
               recipient.profilePicture ||
               "https://cxfluuggeeoujjwckzuu.supabase.co/storage/v1/object/public/imgs/userPics/system.jpg"
             }
             alt="profilePic"
-            className="w-auto h-auto max-w-[15rem] max-h-[15rem] pb-10"
+            className="w-auto h-auto max-w-[15rem] max-h-[15rem] pb-10 rounded-md"
           />
           {anyMessages ? (
             messageData?.map((el) => {
@@ -236,7 +246,7 @@ const Messages = () => {
                 rows="5"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="bg-transparent border border-white rounded-lg"
+                className="bg-black border border-yellow-400/20 rounded-md shadow-md shadow-yellow-400/50"
               />
               <FaArrowAltCircleRight
                 onClick={sendMessage}

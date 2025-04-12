@@ -3,7 +3,7 @@ import React from "react";
 const Button = (props) => {
   return (
     <button
-      className={`px-2 border border-white rounded-md bg-black bg-opacity-40 text-[1.5rem] ${
+      className={`px-5 border border-yellow-400/20 rounded-md bg-black shadow-md shadow-yellow-400/50 ${
         props.classes ? props.classes : undefined
       }`}
       type={props.submit ? "submit" : "button"}

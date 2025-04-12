@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Loading from "../components/custom/loading";
 import { useUpdate } from "../hooks/use-update";
 import Item from "../components/item";
 import ItemDetail from "../components/itemDetail";
-import Button from "../components/custom/button";
+import { api } from "../core/api";
+import { NotificationContext } from "../context/NotificationContext";
+import { GiClusterBomb, GiRadioactive } from "react-icons/gi";
+import supabase from "../core/supabase";
 
 const Items = (props) => {
-  const { data, isLoading } = useUpdate("/items");
+  const { notifyContext, setStatus } = useContext(NotificationContext);
+
+  const { data, refetch, isLoading } = useUpdate("/items");
   const { data: userData, isLoading: usersLoading } = useUpdate("/users");
   const loading = isLoading || usersLoading;
   // if true, show item detail, else show all items
@@ -18,6 +23,57 @@ const Items = (props) => {
   const [comparison, setComparison] = useState("=");
   const [sortingValue, setSortingValue] = useState("");
   const curUsername = localStorage.getItem("curUser");
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const token = localStorage.getItem("token");
+
+  const deleteItem = async (id, image) => {
+    if (window.confirm("Really wanna delete the item?")) {
+      const { data: presentData } = await supabase.storage.from("imgs").list("items");
+      const curFile = presentData.find((el) => image.includes(el.name));
+      console.log(curFile);
+      const { data, error } = await supabase.storage.from("imgs").remove([`items/${curFile.name}`]);
+
+      if (error) {
+        console.log("Error deleting file", error);
+      } else {
+        console.log("File successfully deleted!", data);
+      }
+
+      setSubmitting(true);
+      await api
+        .delete(`/items/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then(async () => {
+          await refetch();
+          setStatus("success");
+          notifyContext(
+            <div className="flex items-center">
+              <GiClusterBomb className="mr-2" /> <span>Item deleted!</span>
+            </div>,
+            "success"
+          );
+        })
+        .catch((err) => {
+          console.log(`Delete req - ${err}`);
+          setStatus("error");
+          notifyContext(
+            <div className="flex items-center">
+              <GiRadioactive className="mr-2" /> <span>Failed to delete item!</span>
+            </div>,
+            "error"
+          );
+        })
+        .finally(() => {
+          setSubmitting(false);
+        });
+    }
+  };
 
   if (loading) return <Loading />;
 
@@ -46,14 +102,16 @@ const Items = (props) => {
           </p>
           {/* FILTER */}
           {addSort && (
-            <div className="flex justify-around mb-20 bg-black/50 rounded-lg shadow-yellow-400 shadow-md p-10">
-              <label htmlFor="sort">Sort by:</label>
+            <div className="flex justify-around mb-20 bg-black rounded-lg shadow-yellow-400 shadow-md p-10">
+              <label htmlFor="sort" className="mr-2">
+                Sort by:
+              </label>
               <select
                 name="sort"
                 id="sort"
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="text-black">
+                className="bg-black rounded-md shadow-md shadow-yellow-400/50 border border-yellow-400/20 focus:outline-none">
                 <option value="">---</option>
                 <option value="name">Name</option>
                 <option value="price">Price</option>
@@ -75,7 +133,7 @@ const Items = (props) => {
               )}
               <input
                 type={sort === "price" ? "number" : "text"}
-                className="bg-transparent border border-white rounded-md ml-5"
+                className="bg-transparent shadow-md shadow-yellow-400/50 border border-yellow-400/20 rounded-md ml-5 focus:outline-none"
                 value={sortingValue}
                 onChange={(e) => setSortingValue(e.target.value)}
               />
@@ -84,9 +142,11 @@ const Items = (props) => {
         </>
       )}
       <div
-        className={`mt-10  ${
+        className={`my-20  ${
           props.own ? "w-full" : "w-4/5"
-        } grid [@media(max-width:767px)]:grid-cols-2 [@media(max-width:500px)]:!grid-cols-1 [@media(max-width:500px)]:w-1/2 md:grid-cols-3 xl:grid-cols-4 gap-10`}>
+        } grid [@media(max-width:767px)]:grid-cols-2 [@media(max-width:500px)]:!grid-cols-1 [@media(max-width:500px)]:w-1/2 md:grid-cols-3 xl:grid-cols-4 gap-10 ${
+          submitting && "cursor-not-allowed opacity-70 pointer-events-none"
+        }`}>
         {data?.map((el) => {
           const itemPattern = (
             <div key={el.id}>
@@ -99,6 +159,7 @@ const Items = (props) => {
                 own={props.own ? true : false}
                 getDetail={() => setItemDetail(el)}
                 profile={props.curUser}
+                deleteItem={() => deleteItem(el.id, el.image)}
               />
             </div>
           );
