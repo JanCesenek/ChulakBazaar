@@ -217,7 +217,7 @@ const SignUp = (props) => {
               value={firstNameValue}
               onChange={firstNameChangeHandler}
               onBlur={firstNameBlurHandler}
-              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none ${
+              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
                 firstNameHasError && "!border-red-600"
               }`}
             />
@@ -233,7 +233,7 @@ const SignUp = (props) => {
               value={lastNameValue}
               onChange={lastNameChangeHandler}
               onBlur={lastNameBlurHandler}
-              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none ${
+              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
                 lastNameHasError && "!border-red-600"
               }`}
             />
@@ -249,7 +249,7 @@ const SignUp = (props) => {
               value={usernameValue}
               onChange={usernameChangeHandler}
               onBlur={usernameBlurHandler}
-              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none ${
+              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
                 usernameHasError && "!border-red-600"
               }`}
             />
@@ -265,7 +265,7 @@ const SignUp = (props) => {
               value={passwordValue}
               onChange={passwordChangeHandler}
               onBlur={passwordBlurHandler}
-              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none ${
+              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
                 passwordHasError && "!border-red-600"
               }`}
             />

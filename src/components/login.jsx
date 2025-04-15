@@ -73,7 +73,7 @@ const Login = (props) => {
             name="username"
             value={usernameValue}
             onChange={(e) => setUsernameValue(e.target.value)}
-            className="bg-transparent ml-5 border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none"
+            className="bg-transparent ml-5 border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%]"
           />
         </div>
         <div className="w-full flex justify-between">
@@ -84,7 +84,7 @@ const Login = (props) => {
             name="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-transparent ml-5 border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none"
+            className="bg-transparent ml-5 border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%]"
           />
         </div>
         <Button
