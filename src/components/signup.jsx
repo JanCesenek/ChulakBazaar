@@ -163,6 +163,10 @@ const SignUp = (props) => {
         addBearerToken(token);
         localStorage.setItem("token", token);
         localStorage.setItem("curUser", username);
+        resetForm();
+        props.setLog();
+        navigate("/users");
+        setIsSubmitting(false);
         setStatus("success");
         notifyContext(
           <div className="flex items-center">
@@ -171,171 +175,170 @@ const SignUp = (props) => {
           </div>,
           "login"
         );
-        resetForm();
-        navigate("/users");
-        props.setLog();
       })
       .catch((err) => {
         console.log(`Post req err - ${err}`);
+        setIsSubmitting(false);
         setStatus("error");
         notifyContext(
           <div className="flex items-center">
             <GiRadioactive className="mr-2" /> <span>Invalid credentials!</span>
           </div>,
-          "error"
+          "iris"
         );
       });
-    setIsSubmitting(false);
   };
 
   const validForm = firstNameIsValid && lastNameIsValid && usernameIsValid && passwordIsValid;
 
   return (
     <div className="flex flex-col items-center text-[1.3rem]">
-      <div className="w-[50rem] mt-10 bg-black/80 p-10 rounded-lg border border-yellow-400/20 shadow-lg shadow-yellow-400/50">
-        <h2 className="text-[2rem] text-center">Validation rules:</h2>
-        <p>First name, Last name: 2-30 characters, letters only</p>
-        <p>Username: 6-16 characters, upper+lowercase and at least one number</p>
-        <p>
-          Password: 8-16 characters, must contain lower+uppercase, number and a special character
+      <div className={`flex flex-col items-center ${isSubmitting && "hidden"}`}>
+        <div className="w-[50rem] mt-10 bg-black/80 p-10 rounded-lg border border-yellow-400/20 shadow-lg shadow-yellow-400/50">
+          <h2 className="text-[2rem] text-center">Validation rules:</h2>
+          <p>First name, Last name: 2-30 characters, letters only</p>
+          <p>Username: 6-16 characters, upper+lowercase and at least one number</p>
+          <p>
+            Password: 8-16 characters, must contain lower+uppercase, number and a special character
+          </p>
+          <p>Profile pic: voluntary, if none provided, default will be used based on gender</p>
+          <p className="text-yellow-400 font-bold">
+            Note: It won't be possible to submit the form until the conditions are met!
+          </p>
+        </div>
+        <div className="w-[50rem] border border-yellow-400/20 rounded-lg shadow-lg shadow-yellow-400/50 mt-10 p-10 bg-black/80">
+          <Form method="post" className="flex flex-col items-start [&>*]:my-2 p-2 text-[1.8rem]">
+            <div className="flex">
+              <label htmlFor="firstName" className="min-w-[15rem] ml-2">
+                First name:
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={firstNameValue}
+                onChange={firstNameChangeHandler}
+                onBlur={firstNameBlurHandler}
+                className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
+                  firstNameHasError && "!border-yellow-300 animate-pulse"
+                }`}
+              />
+            </div>
+            <div className="flex">
+              <label htmlFor="lastName" className="min-w-[15rem] ml-2">
+                Last name:
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={lastNameValue}
+                onChange={lastNameChangeHandler}
+                onBlur={lastNameBlurHandler}
+                className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
+                  lastNameHasError && "!border-yellow-300 animate-pulse"
+                }`}
+              />
+            </div>
+            <div className="flex">
+              <label htmlFor="username" className="min-w-[15rem] ml-2">
+                Username:
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={usernameValue}
+                onChange={usernameChangeHandler}
+                onBlur={usernameBlurHandler}
+                className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
+                  usernameHasError && "!border-yellow-300 animate-pulse"
+                }`}
+              />
+            </div>
+            <div className="flex">
+              <label htmlFor="password" className="min-w-[15rem] ml-2">
+                Password:
+              </label>
+              <input
+                type={passwordVisibility ? "text" : "password"}
+                id="password"
+                name="password"
+                value={passwordValue}
+                onChange={passwordChangeHandler}
+                onBlur={passwordBlurHandler}
+                className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
+                  passwordHasError && "!border-yellow-300 animate-pulse"
+                }`}
+              />
+              {passwordVisibility ? (
+                <BsFillEyeSlashFill
+                  className="w-10 h-10 hover:cursor-pointer self-center ml-2"
+                  onClick={() => setPasswordVisibility(!passwordVisibility)}
+                />
+              ) : (
+                <BsFillEyeFill
+                  className="w-10 h-10 hover:cursor-pointer self-center ml-2"
+                  onClick={() => setPasswordVisibility(!passwordVisibility)}
+                />
+              )}
+            </div>
+            <div className="flex items-center max-w-[40rem]">
+              <p className="min-w-[15rem] ml-2">Profile picture:</p>
+              <label htmlFor="pic" className="flex w-[15rem] text-[1rem] ml-5 hover:cursor-pointer">
+                <BsFillFileImageFill /> {profilePic ? profilePic.name : "Upload image"}
+              </label>
+              <input
+                type="file"
+                name="pic"
+                id="pic"
+                size="10"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+              />
+              {profilePic && (
+                <AiFillCloseCircle
+                  className="w-3 h-3 hover:cursor-pointer mr-2"
+                  onClick={() => {
+                    fileInputRef.current.value = null;
+                    setProfilePic(null);
+                  }}
+                />
+              )}
+            </div>
+            <div className="flex">
+              <label htmlFor="gender" className="min-w-[15rem] ml-2">
+                Gender:
+              </label>
+              <select
+                name="gender"
+                id="gender"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none">
+                <option value="M">M</option>
+                <option value="F">F</option>
+              </select>
+            </div>
+            <Button
+              title={isSubmitting ? "Creating..." : "Create New User"}
+              classes={`self-center !mt-8 ${
+                (!validForm || isSubmitting) && "pointer-events-none opacity-50"
+              }`}
+              submit
+              onClick={createNewUser}
+            />
+          </Form>
+        </div>
+        <p
+          className="my-10 underline hover:cursor-pointer text-[1.5rem] p-10 rounded-md bg-black/80"
+          onClick={props.link}>
+          Already have an account? Click here to log in.
         </p>
-        <p>Profile pic: voluntary, if none provided, default will be used based on gender</p>
-        <p className="text-yellow-400 font-bold">
-          Note: It won't be possible to submit the form until the conditions are met!
-        </p>
-      </div>
-      <div className="w-[50rem] border border-yellow-400/20 rounded-lg shadow-lg shadow-yellow-400/50 mt-10 p-10 bg-black/80">
-        <Form method="post" className="flex flex-col items-start [&>*]:my-2 p-2 text-[1.8rem]">
-          <div className="flex">
-            <label htmlFor="firstName" className="min-w-[15rem] ml-2">
-              First name:
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={firstNameValue}
-              onChange={firstNameChangeHandler}
-              onBlur={firstNameBlurHandler}
-              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
-                firstNameHasError && "!border-red-600"
-              }`}
-            />
-          </div>
-          <div className="flex">
-            <label htmlFor="lastName" className="min-w-[15rem] ml-2">
-              Last name:
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={lastNameValue}
-              onChange={lastNameChangeHandler}
-              onBlur={lastNameBlurHandler}
-              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
-                lastNameHasError && "!border-red-600"
-              }`}
-            />
-          </div>
-          <div className="flex">
-            <label htmlFor="username" className="min-w-[15rem] ml-2">
-              Username:
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={usernameValue}
-              onChange={usernameChangeHandler}
-              onBlur={usernameBlurHandler}
-              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
-                usernameHasError && "!border-red-600"
-              }`}
-            />
-          </div>
-          <div className="flex">
-            <label htmlFor="password" className="min-w-[15rem] ml-2">
-              Password:
-            </label>
-            <input
-              type={passwordVisibility ? "text" : "password"}
-              id="password"
-              name="password"
-              value={passwordValue}
-              onChange={passwordChangeHandler}
-              onBlur={passwordBlurHandler}
-              className={`bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%] ${
-                passwordHasError && "!border-red-600"
-              }`}
-            />
-            {passwordVisibility ? (
-              <BsFillEyeSlashFill
-                className="w-10 h-10 hover:cursor-pointer self-center ml-2"
-                onClick={() => setPasswordVisibility(!passwordVisibility)}
-              />
-            ) : (
-              <BsFillEyeFill
-                className="w-10 h-10 hover:cursor-pointer self-center ml-2"
-                onClick={() => setPasswordVisibility(!passwordVisibility)}
-              />
-            )}
-          </div>
-          <div className="flex items-center max-w-[40rem]">
-            <p className="min-w-[15rem] ml-2">Profile picture:</p>
-            <label htmlFor="pic" className="flex w-[15rem] text-[1rem] ml-5 hover:cursor-pointer">
-              <BsFillFileImageFill /> {profilePic ? profilePic.name : "Upload image"}
-            </label>
-            <input
-              type="file"
-              name="pic"
-              id="pic"
-              size="10"
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-            />
-            {profilePic && (
-              <AiFillCloseCircle
-                className="w-3 h-3 hover:cursor-pointer mr-2"
-                onClick={() => {
-                  fileInputRef.current.value = null;
-                  setProfilePic(null);
-                }}
-              />
-            )}
-          </div>
-          <div className="flex">
-            <label htmlFor="gender" className="min-w-[15rem] ml-2">
-              Gender:
-            </label>
-            <select
-              name="gender"
-              id="gender"
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="bg-transparent border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none">
-              <option value="M">M</option>
-              <option value="F">F</option>
-            </select>
-          </div>
-          <Button
-            title={isSubmitting ? "Creating..." : "Create New User"}
-            classes={`self-center !mt-8 ${
-              (!validForm || isSubmitting) && "pointer-events-none opacity-50"
-            }`}
-            submit
-            onClick={createNewUser}
-          />
-        </Form>
       </div>
       {isSubmitting && <Submitting />}
-      <p
-        className="my-10 underline hover:cursor-pointer text-[1.5rem] p-10 rounded-md bg-black/80"
-        onClick={props.link}>
-        Already have an account? Click here to log in.
-      </p>
     </div>
   );
 };

@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { api } from "../core/api";
 import { useUpdate } from "../hooks/use-update";
 import Loading from "./custom/loading";
 import { GiCircleSparks } from "react-icons/gi";
 import GateClose from "../audio/GateClose.mp3";
+import { NotificationContext } from "../context/NotificationContext";
 
 const MainNavigation = (props) => {
+  const { hideNavbar } = useContext(NotificationContext);
+
   const { data, isLoading } = useUpdate("/messages");
   const curUsername = localStorage.getItem("curUser");
   const removeBearerToken = () => {
@@ -28,7 +31,7 @@ const MainNavigation = (props) => {
   const unreadMessages = data?.find((el) => el.recipient === curUsername && !el.read);
 
   return (
-    <nav className="flex justify-around w-4/5 mt-4 text-[1.5rem]">
+    <nav className={`flex justify-around w-4/5 mt-4 text-[1.5rem] ${hideNavbar && "hidden"}`}>
       <NavLink
         className={({ isActive }) => (isActive ? "text-yellow-500 underline" : undefined)}
         to="/">

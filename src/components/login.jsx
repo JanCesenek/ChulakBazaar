@@ -38,6 +38,8 @@ const Login = (props) => {
         localStorage.setItem("curUser", username);
         localStorage.setItem("token", token);
         props.setLog();
+        navigate("/users");
+        setIsSubmitting(false);
         setStatus("success");
         notifyContext(
           <div className="flex items-center">
@@ -45,64 +47,64 @@ const Login = (props) => {
           </div>,
           "login"
         );
-        navigate("/users");
       })
       .catch((err) => {
         console.log(`Invalid credentials - ${err}`);
+        setIsSubmitting(false);
         setStatus("error");
         notifyContext(
           <div className="flex items-center">
             <GiRadioactive className="mr-2" /> <span>Invalid credentials!</span>
           </div>,
-          "error"
+          "iris"
         );
-      })
-      .finally(() => {
-        setIsSubmitting(false);
       });
   };
 
   return (
     <div className="flex flex-col justify-start items-center">
-      <Form className="rounded-lg shadow-lg shadow-yellow-400/50 flex flex-col justify-center items-center p-10 bg-black/80 text-[2rem] my-10 [&>*]:my-2">
-        <div className="w-full flex justify-between">
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={usernameValue}
-            onChange={(e) => setUsernameValue(e.target.value)}
-            className="bg-transparent ml-5 border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%]"
+      <div
+        className={`flex flex-col justify-start items-center w-full ${isSubmitting && "hidden"}`}>
+        <Form className="rounded-lg shadow-lg shadow-yellow-400/50 flex flex-col justify-center items-center p-10 bg-black/80 text-[2rem] my-10 [&>*]:my-2">
+          <div className="w-full flex justify-between">
+            <label htmlFor="username">Username:</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={usernameValue}
+              onChange={(e) => setUsernameValue(e.target.value)}
+              className="bg-transparent ml-5 border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%]"
+            />
+          </div>
+          <div className="w-full flex justify-between">
+            <label htmlFor="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-transparent ml-5 border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%]"
+            />
+          </div>
+          <Button
+            title={isSubmitting ? "Logging in..." : "Log In"}
+            submit
+            classes={`${
+              (usernameValue.length < 6 || password.length < 8 || isSubmitting) &&
+              "cursor-not-allowed pointer-events-none opacity-50"
+            } !mt-10`}
+            onClick={logIn}
           />
-        </div>
-        <div className="w-full flex justify-between">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="bg-transparent ml-5 border border-yellow-400/20 shadow-md shadow-yellow-400/50 rounded-md focus:outline-none w-[60%]"
-          />
-        </div>
-        <Button
-          title={isSubmitting ? "Logging in..." : "Log In"}
-          submit
-          classes={
-            (usernameValue.length < 6 || password.length < 8 || isSubmitting) &&
-            "cursor-not-allowed pointer-events-none opacity-50"
-          }
-          onClick={logIn}
-        />
-      </Form>
+        </Form>
+        <p
+          className="mt-5 text-yellow-400 underline hover:cursor-pointer text-[1.5rem]"
+          onClick={props.link}>
+          New user? Click here to create an account.
+        </p>{" "}
+      </div>
       {isSubmitting && <Submitting />}
-      <p
-        className="mt-5 text-yellow-400 underline hover:cursor-pointer text-[1.5rem]"
-        onClick={props.link}>
-        New user? Click here to create an account.
-      </p>{" "}
     </div>
   );
 };

@@ -3,12 +3,14 @@ import AsgardBeam from "../audio/AsgardBeam.mp3";
 import SGCAlarm from "../audio/SGCAlarm.mp3";
 import GateClose from "../audio/GateClose.mp3";
 import GateOpen from "../audio/GateOpen.mp3";
+import IrisClose from "../audio/IrisClose.mp3";
 
 export const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
   const [notification, setNotification] = useState(false);
   const [status, setStatus] = useState("success");
+  const [hideNavbar, setHideNavbar] = useState(false);
 
   const notifyContext = (msg, state) => {
     if (state === "success") {
@@ -23,6 +25,9 @@ export const NotificationProvider = ({ children }) => {
     } else if (state === "login") {
       const audio = new Audio(GateOpen);
       audio.play();
+    } else if (state === "iris") {
+      const audio = new Audio(IrisClose);
+      audio.play();
     }
     setNotification(msg);
     setTimeout(() => {
@@ -31,7 +36,8 @@ export const NotificationProvider = ({ children }) => {
   };
 
   return (
-    <NotificationContext.Provider value={{ notification, status, setStatus, notifyContext }}>
+    <NotificationContext.Provider
+      value={{ notification, status, setStatus, notifyContext, hideNavbar, setHideNavbar }}>
       {children}
     </NotificationContext.Provider>
   );
