@@ -14,7 +14,7 @@ import { FaSpaceShuttle } from "react-icons/fa";
 import { GiRadioactive } from "react-icons/gi";
 
 const SignUp = (props) => {
-  const { notifyContext, setStatus } = useContext(NotificationContext);
+  const { notifyContext, setStatus, setHideNavbar } = useContext(NotificationContext);
 
   // Variables ensuring correct validation in frontend, won't allow user to submit a form until conditions are met
   const {
@@ -155,6 +155,7 @@ const SignUp = (props) => {
         : defaultPic,
     };
     setIsSubmitting(true);
+    setHideNavbar(true);
     await api
       .post("/signup", postReqPayload)
       .then(async (res) => {
@@ -166,7 +167,6 @@ const SignUp = (props) => {
         resetForm();
         props.setLog();
         navigate("/users");
-        setIsSubmitting(false);
         setStatus("success");
         notifyContext(
           <div className="flex items-center">
@@ -178,7 +178,6 @@ const SignUp = (props) => {
       })
       .catch((err) => {
         console.log(`Post req err - ${err}`);
-        setIsSubmitting(false);
         setStatus("error");
         notifyContext(
           <div className="flex items-center">
@@ -186,6 +185,10 @@ const SignUp = (props) => {
           </div>,
           "iris"
         );
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+        setHideNavbar(false);
       });
   };
 

@@ -8,7 +8,7 @@ import { FaSpaceShuttle } from "react-icons/fa";
 import { GiRadioactive } from "react-icons/gi";
 
 const Login = (props) => {
-  const { notifyContext, setStatus } = useContext(NotificationContext);
+  const { notifyContext, setStatus, setHideNavbar } = useContext(NotificationContext);
 
   const navigate = useNavigate();
 
@@ -27,6 +27,7 @@ const Login = (props) => {
   const logIn = async () => {
     const username = usernameValue[0]?.toUpperCase() + usernameValue?.slice(1).toLowerCase();
     setIsSubmitting(true);
+    setHideNavbar(true);
     await api
       .post("/login", {
         username,
@@ -39,7 +40,6 @@ const Login = (props) => {
         localStorage.setItem("token", token);
         props.setLog();
         navigate("/users");
-        setIsSubmitting(false);
         setStatus("success");
         notifyContext(
           <div className="flex items-center">
@@ -50,7 +50,6 @@ const Login = (props) => {
       })
       .catch((err) => {
         console.log(`Invalid credentials - ${err}`);
-        setIsSubmitting(false);
         setStatus("error");
         notifyContext(
           <div className="flex items-center">
@@ -58,6 +57,10 @@ const Login = (props) => {
           </div>,
           "iris"
         );
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+        setHideNavbar(false);
       });
   };
 
