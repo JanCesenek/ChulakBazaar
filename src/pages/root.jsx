@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import MainNavigation from "../components/mainNavigation";
 import { Outlet } from "react-router-dom";
 import { FaCopyright } from "react-icons/fa";
-import logo from "../imgs/flamebulb.svg";
+import logo from "/flamebulb.svg";
 import { GiRingedPlanet, GiCoinsPile } from "react-icons/gi";
 import { useUpdate } from "../hooks/use-update";
 import Loading from "../components/custom/loading";
