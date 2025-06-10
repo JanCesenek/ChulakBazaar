@@ -421,7 +421,7 @@ const Profile = (props) => {
           </p>
         )}
         {addReview && (
-          <div className="bg-black bg-opacity-50 border border-white rounded-md [&>*]:my-2 p-5 flex flex-col">
+          <div className="bg-black bg-opacity-50 shadow-lg shadow-yellow-500/50 rounded-md [&>*]:my-2 p-5 flex flex-col">
             <div className="flex justify-between items-center">
               <label htmlFor="message">Message:</label>
               <textarea
@@ -431,7 +431,7 @@ const Profile = (props) => {
                 rows="5"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="bg-transparent border border-white rounded-md"
+                className="bg-transparent rounded-md shadow-md shadow-yellow-500/50 ml-5"
               />
             </div>
             <div className="flex justify-start items-center">
@@ -445,7 +445,7 @@ const Profile = (props) => {
                 step="0.5"
                 value={rating}
                 onChange={(e) => setRating(e.target.value)}
-                className="bg-transparent border border-white rounded-md ml-5"
+                className="bg-transparent rounded-md shadow-md shadow-yellow-500/50 ml-5"
               />
             </div>
             <Button
